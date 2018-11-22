@@ -23,15 +23,17 @@ AWS Setup
 In order to set everything up at Amazon Web Services, you need to perform the following 
 steps:
 1. Create an SSH key pair and upload the public key to EC2 with the name `ssh-proxy`.
-2. Create an IAM user and remember its credentials.
-3. Configure [`iam-policy.json`](https://github.com/mroi/aws-ssh-proxy/blob/master/aws/iam-policy.json) as 
-   this user’s inline permission policy.
-4. Create an EC2 security group from 
+2. Create an IAM user (recommended name is `ssh-proxy`) and remember its credentials.
+3. Create an EC2 security group from 
    [`security-group.json`](https://github.com/mroi/aws-ssh-proxy/blob/master/aws/security-group.json) 
    and its ingress permissions from 
    [`security-group-ingress.json`](https://github.com/mroi/aws-ssh-proxy/blob/master/aws/security-group-ingress.json).
-5. Finally, create an EC2 launch template from 
+4. Create an EC2 launch template from 
    [`launch-template.json`](https://github.com/mroi/aws-ssh-proxy/blob/master/aws/launch-template.json).
+5. Finally, configure 
+   [`iam-policy.json`](https://github.com/mroi/aws-ssh-proxy/blob/master/aws/iam-policy.json) 
+   as the IAM user’s inline permission policy. Replace the launch template ID with the one 
+   you created above.
 
 PHP Web Service
 ---------------
