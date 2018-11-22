@@ -1,0 +1,32 @@
+{
+	"LaunchTemplateName": "ssh-proxy",
+	"LaunchTemplateData": {
+		"ImageId": "ami-0f5dbc86dd9cbf7a8",
+		"InstanceType": "t2.nano",
+		"InstanceInitiatedShutdownBehavior": "terminate",
+		"KeyName": "ssh-proxy",
+		"SecurityGroups": [
+			"ssh"
+		],
+		"TagSpecifications": [
+			{
+				"ResourceType": "instance",
+				"Tags": [
+					{
+						"Value": "<undefined>",
+						"Key": "ssh-proxy"
+					}
+				]
+			},
+			{
+				"ResourceType": "volume",
+				"Tags": [
+					{
+						"Value": "<undefined>",
+						"Key": "ssh-proxy"
+					}
+				]
+			}
+		]
+	}
+}

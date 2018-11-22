@@ -1,0 +1,4 @@
+{
+	"GroupName": "ssh",
+	"Description": "ssh access allowed via port 22 from anywhere"
+}
