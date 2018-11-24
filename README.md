@@ -62,3 +62,6 @@ its IP address. When a proxy VM is already running, only the IP address is retur
 **`/status?<client>&<hmac>`**  
 Returns the public IP address of the SSH proxy VM when such a VM has been started for the 
 given client.
+
+**`/terminate?<client>&<hmac>`**  
+Terminates the running SSH proxy VM.

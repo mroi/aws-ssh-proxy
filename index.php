@@ -84,6 +84,12 @@ try {
 		// print public IPs of running VMs
 		print($result->search("Reservations[].Instances[?State.Name=='running'][].PublicIpAddress | [0]"));
 		break;
+
+	case 'terminate':
+		$ec2->terminateInstances([
+			'InstanceIds' => $result->search("Reservations[].Instances[].InstanceId")
+		]);
+		break;
 	}
 }
 catch (Exception $e) {
