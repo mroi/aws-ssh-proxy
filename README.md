@@ -47,9 +47,14 @@ Make sure your web server also has the credentials of the `ssh-proxy` IAM accoun
 its `~/.aws/credentials` file or wherever you keep your AWS credentials. Use a profile name 
 of `ssh-proxy`.
 
+The web service uses a pre-shared secret for request authentication. A SHA256-HMAC is 
+calculated over the string `<command>?<client>` and appended to the request URL. Therefore, 
+you need to create a random secret that is shared amongst all clients. Store this secret and 
+optionally any other configuration in `config.php`.
+
 The web service understands three commands, all of which use a client machine identifier as 
 their query string:
 
-**`/status?<client>`**  
+**`/status?<client>&<hmac>`**  
 Reveals the public IP address of the SSH proxy when such a proxy has been started for the 
 given client.
