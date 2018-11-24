@@ -60,5 +60,5 @@ Starts a new SSH proxy VM for the given client, waits until the VM is running an
 its IP address. When a proxy VM is already running, only the IP address is returned.
 
 **`/status?<client>&<hmac>`**  
-Reveals the public IP address of the SSH proxy when such a proxy has been started for the 
+Returns the public IP address of the SSH proxy VM when such a VM has been started for the 
 given client.
