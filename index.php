@@ -1,10 +1,14 @@
 <?php
+include('config.php');
 require('aws.phar');
 
+// extract request details
 $command = explode('?', $_SERVER['REQUEST_URI'])[0];
 $command = trim($command, '/');
 $client = $_SERVER['QUERY_STRING'];
 $client = preg_replace('/[^A-Za-z0-9]/', '', $client);
+
+// you can override these variables in config.php
 $region = isset($region) ? $region : getenv('AWS_DEFAULT_REGION');
 
 try {
