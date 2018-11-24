@@ -38,7 +38,7 @@ try {
 
 	switch ($command) {
 	case 'status':
-		// obtain public IPs of running VMs
+		// print public IPs of running VMs
 		print($result->search("Reservations[].Instances[?State.Name=='running'][].PublicIpAddress | [0]"));
 		break;
 	}
