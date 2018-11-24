@@ -5,10 +5,12 @@ $command = explode('?', $_SERVER['REQUEST_URI'])[0];
 $command = trim($command, '/');
 $client = $_SERVER['QUERY_STRING'];
 $client = preg_replace('/[^A-Za-z0-9]/', '', $client);
+$region = isset($region) ? $region : getenv('AWS_DEFAULT_REGION');
 
 try {
 	$ec2 = new Aws\Ec2\Ec2Client([
 		'profile' => 'ssh-proxy',
+		'region' => $region,
 		'version' => 'latest'
 	]);
 
