@@ -18,6 +18,7 @@
 			"Effect": "Allow",
 			"Action": "ec2:RunInstances",
 			"Resource": [
+				"arn:aws:ec2:eu-central-1:724339084074:security-group/*",
 				"arn:aws:ec2:eu-central-1:724339084074:network-interface/*",
 				"arn:aws:ec2:eu-central-1:724339084074:subnet/*"
 			]

@@ -37,6 +37,49 @@ try {
 	]);
 
 	switch ($command) {
+
+	case 'launch':
+		// prevent race between check and action by file locking
+		$file = fopen(__FILE__, 'r+');
+		flock($file, LOCK_EX);
+		if (empty($result->search("Reservations[].Instances[?State.Name=='pending'][]")) &&
+		    empty($result->search("Reservations[].Instances[?State.Name=='running'][]"))) {
+			// launch a new instance
+			$result = $ec2->runInstances([
+				'LaunchTemplate' => [
+					'LaunchTemplateName' => 'ssh-proxy'
+				],
+				'MaxCount' => 1,
+				'MinCount' => 1,
+				'TagSpecifications' => [
+					[
+						'ResourceType' => 'instance',
+						'Tags' => [
+							[
+								'Key' => 'ssh-proxy',
+								'Value' => $client
+							]
+						]
+					]
+				]
+			]);
+			$id = $result->search("Instances[0].InstanceId");
+		} else {
+			$id = $result->search("Reservations[].Instances[?State.Name=='pending'][].InstanceId | [0]");
+		}
+		flock($file, LOCK_UN);
+		fclose($file);
+
+		// wait until the instance is running
+		while ($id) {
+			sleep(5);
+			$result = $ec2->describeInstances([
+				'InstanceIds' => [$id]
+			]);
+			if (!empty($result->search("Reservations[].Instances[?State.Name=='running'][]"))) break;
+		}
+		// fallthrough intended
+
 	case 'status':
 		// print public IPs of running VMs
 		print($result->search("Reservations[].Instances[?State.Name=='running'][].PublicIpAddress | [0]"));

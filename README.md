@@ -55,6 +55,10 @@ optionally any other configuration in `config.php`.
 The web service understands three commands, all of which use a client machine identifier as 
 their query string:
 
+**`/launch?<client>&<hmac>`**  
+Starts a new SSH proxy VM for the given client, waits until the VM is running and returns 
+its IP address. When a proxy VM is already running, only the IP address is returned.
+
 **`/status?<client>&<hmac>`**  
 Reveals the public IP address of the SSH proxy when such a proxy has been started for the 
 given client.
