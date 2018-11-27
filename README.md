@@ -21,7 +21,9 @@ AWS Setup
 ---------
 
 In order to set everything up at Amazon Web Services, you need to perform the following 
-steps:
+steps. You will find everything you need for this setup in the 
+[`aws`](https://github.com/mroi/aws-ssh-proxy/blob/master/aws/) directory.
+
 1. Create an SSH key pair and upload the public key to EC2 with the name `ssh-proxy`.
 2. Create an IAM user (recommended name is `ssh-proxy`) and remember its credentials.
 3. Create an EC2 security group from 
