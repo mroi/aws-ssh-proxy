@@ -1,4 +1,5 @@
 /.aws
 /.user.ini
 /aws.phar
+/client/.build
 /config.php
