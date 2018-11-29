@@ -27,7 +27,12 @@ do {
 		}
 	}
 
-	// FIXME: clientArgument?.removeAll(where: { CharacterSet.alphanumerics.contains($0) })
+	let clientArgumentSanitized = clientArgument?.unicodeScalars.filter {
+		CharacterSet.alphanumerics.contains($0)
+	}
+	if let sanitized = clientArgumentSanitized {
+		clientArgument = String(sanitized)
+	}
 	while serverArgument?.hasSuffix("/") ?? false {
 		serverArgument = String(serverArgument!.dropLast())
 	}
