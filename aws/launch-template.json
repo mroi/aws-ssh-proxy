@@ -2,7 +2,7 @@
 	"LaunchTemplateName": "ssh-proxy",
 	"LaunchTemplateData": {
 		"ImageId": "ami-0f5dbc86dd9cbf7a8",
-		"InstanceType": "t2.nano",
+		"InstanceType": "t3.nano",
 		"InstanceInitiatedShutdownBehavior": "terminate",
 		"KeyName": "ssh-proxy",
 		"SecurityGroups": [
