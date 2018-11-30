@@ -82,7 +82,9 @@ try {
 
 	case 'status':
 		// print public IPs of running VMs
-		print($result->search("Reservations[].Instances[?State.Name=='running'][].PublicIpAddress | [0]"));
+		$ip = $result->search("Reservations[].Instances[?State.Name=='running'][].PublicIpAddress | [0]");
+		$hmac = hash_hmac('sha256', $ip, $secret);
+		print("${ip} ${hmac}\n");
 		break;
 
 	case 'terminate':
