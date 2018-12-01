@@ -44,8 +44,27 @@ try {
 		flock($file, LOCK_EX);
 		if (empty($result->search("Reservations[].Instances[?State.Name=='pending'][]")) &&
 		    empty($result->search("Reservations[].Instances[?State.Name=='running'][]"))) {
+			// search latest version of Amazon Linux image
+			$result = $ec2->describeImages([
+				'Filters' => [
+					[
+						'Name' => 'name',
+						'Values' => ['amzn2-ami-hvm-*-x86_64-gp2']
+					],
+					[
+						'Name' => 'owner-id',
+						'Values' => ['137112412989']
+					],
+					[
+						'Name' => 'state',
+						'Values' => ['available']
+					]
+				]
+			]);
+			$image = $result->search("Images | sort_by(@, &CreationDate) | [-1].ImageId");
 			// launch a new instance
 			$result = $ec2->runInstances([
+				'ImageId' => $image,
 				'LaunchTemplate' => [
 					'LaunchTemplateName' => 'ssh-proxy'
 				],

@@ -3,6 +3,11 @@
 	"Statement": [
 		{
 			"Effect": "Allow",
+			"Action": "ec2:DescribeImages",
+			"Resource": "*"
+		},
+		{
+			"Effect": "Allow",
 			"Action": "ec2:RunInstances",
 			"Resource": "*",
 			"Condition": {
@@ -11,6 +16,16 @@
 				},
 				"Bool": {
 					"ec2:IsLaunchTemplateResource": "true"
+				}
+			}
+		},
+		{
+			"Effect": "Allow",
+			"Action": "ec2:RunInstances",
+			"Resource": "arn:aws:ec2:eu-central-1::image/ami-*",
+			"Condition": {
+				"StringEquals": {
+					"ec2:Owner": "amazon"
 				}
 			}
 		},
