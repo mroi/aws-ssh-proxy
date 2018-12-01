@@ -5,8 +5,7 @@ enum ArgumentError: Error {
 	case missing(_: String)
 }
 
-do {
-	/* parse arguments */
+func parseArguments() throws -> (client: String, secret: String, server: String) {
 	let arguments = CommandLine.arguments.dropFirst()
 	var iterator = arguments.makeIterator()
 
@@ -46,6 +45,13 @@ do {
 	guard let server = serverArgument else {
 		throw ArgumentError.missing("--url")
 	}
+
+	return (client, secret, server)
+}
+
+
+do {
+	let arguments = try parseArguments()
 }
 catch let error as ArgumentError {
 	print(error)
