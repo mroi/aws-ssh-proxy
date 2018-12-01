@@ -17,7 +17,7 @@ $region = isset($region) ? $region : getenv('AWS_DEFAULT_REGION');
 $secret = isset($secret) ? $secret : exit();
 
 // check request authentication
-if ($hmac !== hash_hmac('sha256', $nonce . $command . '?' . $client, $secret, true)) {
+if (!hash_equals($hmac, hash_hmac('sha256', $nonce . $command . '?' . $client, $secret, true))) {
 	header($_SERVER['SERVER_PROTOCOL'] . ' 401 Unauthorized');
 	exit();
 }
