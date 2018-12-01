@@ -7,15 +7,17 @@ $command = explode('?', $_SERVER['REQUEST_URI'])[0];
 $command = trim($command, '/');
 $client = explode('&', $_SERVER['QUERY_STRING'])[0];
 $client = preg_replace('/[^A-Za-z0-9]/', '', $client);
-$hmac = explode('&', $_SERVER['QUERY_STRING'])[1];
-$hmac = preg_replace('/[^0-9a-f]/', '', $hmac);
+$auth = explode('&', $_SERVER['QUERY_STRING'])[1];
+$auth = base64_decode($auth);
+$nonce = substr($auth, 0, 10);
+$hmac = substr($auth, 10);
 
 // you can override these variables in config.php
 $region = isset($region) ? $region : getenv('AWS_DEFAULT_REGION');
 $secret = isset($secret) ? $secret : exit();
 
 // check request authentication
-if ($hmac !== hash_hmac('sha256', $command . '?' . $client, $secret)) {
+if ($hmac !== hash_hmac('sha256', $nonce . $command . '?' . $client, $secret, true)) {
 	header($_SERVER['SERVER_PROTOCOL'] . ' 401 Unauthorized');
 	exit();
 }
@@ -102,8 +104,10 @@ try {
 	case 'status':
 		// print public IPs of running VMs
 		$ip = $result->search("Reservations[].Instances[?State.Name=='running'][].PublicIpAddress | [0]");
-		$hmac = hash_hmac('sha256', $ip, $secret);
-		print("${ip} ${hmac}\n");
+		if ($ip) {
+			$auth = base64_encode($nonce . hash_hmac('sha256', $nonce . $ip, $secret, true));
+			print("${ip} ${auth}\n");
+		}
 		break;
 
 	case 'terminate':

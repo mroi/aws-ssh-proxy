@@ -51,23 +51,26 @@ Make sure your web server also has the credentials of the `ssh-proxy` IAM accoun
 its `~/.aws/credentials` file or wherever you keep your AWS credentials. Use a profile name 
 of `ssh-proxy`.
 
-The web service uses a pre-shared secret for request authentication. A SHA256-HMAC is 
-calculated over the string `<command>?<client>` and appended to the request URL. Therefore, 
-you need to create a random secret that is shared amongst all clients. Store this secret and 
-optionally any other configuration in `config.php`.
+The web service uses a pre-shared secret for request authentication. The authentication 
+token is formed by first generating a 10-byte random nonce. Then, a SHA256-HMAC is 
+calculated over the string `<nonce><command>?<client>`. The result is Base64-encoded and 
+appended to the request URL. Therefore, you need to create a random secret that is shared 
+amongst all clients. Store this secret and optionally any other configuration in 
+`config.php`.
 
 The web service understands three commands, all of which use a client machine identifier as 
 their query string:
 
-**`/launch?<client>&<hmac>`**  
+**`/launch?<client>&<token>`**  
 Starts a new SSH proxy for the given client, waits until the proxy is running and returns 
 its IP address. When a proxy is already running, only the IP address is returned.
 
-**`/status?<client>&<hmac>`**  
+**`/status?<client>&<token>`**  
 Returns the public IP address of the SSH proxy when such a proxy has been started for the 
-given client.
+given client. An authentication token similar to the one used for requests is generated to 
+verify the IP address. The same nonce is used to prevent replay attacks.
 
-**`/terminate?<client>&<hmac>`**  
+**`/terminate?<client>&<token>`**  
 Terminates the running SSH proxy.
 
 This work is licensed under the [WTFPL](http://www.wtfpl.net/), so you can do anything you 
