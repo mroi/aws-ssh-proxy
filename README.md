@@ -25,14 +25,16 @@ steps. You will find everything you need for this setup in the
 [`aws`](https://github.com/mroi/aws-ssh-proxy/blob/master/aws/) directory.
 
 1. Create an SSH key pair and upload the public key to EC2 with the name `ssh-proxy`.
-2. Create an IAM user (recommended name is `ssh-proxy`) and remember its credentials.
+2. Create an IAM user (recommended name is `ssh-proxy`) and keep its credentials.
 3. Create an EC2 security group from 
    [`security-group.json`](https://github.com/mroi/aws-ssh-proxy/blob/master/aws/security-group.json) 
    and its ingress permissions from 
    [`security-group-ingress.json`](https://github.com/mroi/aws-ssh-proxy/blob/master/aws/security-group-ingress.json).
-4. Create an EC2 launch template from 
-   [`launch-template.json`](https://github.com/mroi/aws-ssh-proxy/blob/master/aws/launch-template.json).
-5. Finally, configure 
+4. Create a VPC subnet under the default VPC or any other.
+5. Create an EC2 launch template from
+   [`launch-template.json`](https://github.com/mroi/aws-ssh-proxy/blob/master/aws/launch-template.json). 
+   Replace the security group and subnet IDs with the ones created above.
+6. Finally, configure 
    [`iam-policy.json`](https://github.com/mroi/aws-ssh-proxy/blob/master/aws/iam-policy.json) 
    as the IAM user’s inline permission policy. Replace the launch template ID with the one 
    you created above.

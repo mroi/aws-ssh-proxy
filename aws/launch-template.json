@@ -1,12 +1,34 @@
 {
 	"LaunchTemplateName": "ssh-proxy",
 	"LaunchTemplateData": {
-		"InstanceType": "t3.nano",
+		"DisableApiTermination": false,
 		"InstanceInitiatedShutdownBehavior": "terminate",
+		"InstanceType": "t3.nano",
 		"KeyName": "ssh-proxy",
-		"SecurityGroups": [
-			"ssh"
+		"BlockDeviceMappings": [
+			{
+				"DeviceName": "/dev/xvda",
+				"Ebs": {
+					"DeleteOnTermination": true,
+					"VolumeType": "gp2"
+				}
+			}
 		],
+		"Monitoring": {
+			"Enabled": false
+		},
+		"NetworkInterfaces": [
+			{
+				"AssociatePublicIpAddress": true,
+				"DeleteOnTermination": true,
+				"DeviceIndex": 0,
+				"Groups": ["sg-<ID>"],
+				"SubnetId": "subnet-<ID>"
+			}
+		],
+		"Placement": {
+			"Tenancy": "default"
+		},
 		"TagSpecifications": [
 			{
 				"ResourceType": "instance",
