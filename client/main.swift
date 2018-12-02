@@ -1,6 +1,7 @@
 import Foundation
 import Security
 import CommonCrypto
+import Dispatch
 
 
 enum ArgumentError: Error {
@@ -11,6 +12,12 @@ enum ArgumentError: Error {
 
 enum QueryError: Error {
 	case noRandom
+	case clientError(_: String)
+	case serverError(_: String)
+	case mimeType(_: String)
+	case noHTTPResponse
+	case noMimeType
+	case noData
 }
 
 func parseArguments() throws -> (client: String, secret: String, server: String) {
@@ -85,6 +92,52 @@ extension Data {
 	}
 }
 
+func request(url: URL) throws -> (ip: String, token: String)? {
+	let completion = DispatchSemaphore(value: 0)
+	var requestError: QueryError?
+	var result: String?
+
+	let task = URLSession.shared.dataTask(with: url) { data, response, error in
+		defer { completion.signal() }
+		guard error == nil else {
+			requestError = QueryError.clientError(error!.localizedDescription)
+			return
+		}
+		guard let httpResponse = response as? HTTPURLResponse else {
+			requestError = QueryError.noHTTPResponse
+			return
+		}
+		guard (200...299).contains(httpResponse.statusCode) else {
+			requestError = QueryError.serverError(String(httpResponse.statusCode))
+			return
+		}
+		guard let mimeType = httpResponse.mimeType else {
+			requestError = QueryError.noMimeType
+			return
+		}
+		guard mimeType == "text/plain" else {
+			requestError = QueryError.mimeType(mimeType)
+			return
+		}
+		guard let data = data, let string = String(data: data, encoding: .utf8) else {
+			requestError = QueryError.noData
+			return
+		}
+
+		result = string
+	}
+	task.resume()
+	completion.wait()
+
+	if requestError != nil {
+		throw requestError!
+	}
+	guard let pieces = result?.split(separator: " ", maxSplits: 1), pieces.count == 2 else {
+			return nil
+	}
+	return (String(pieces[0]), String(pieces[1]))
+}
+
 
 do {
 	let arguments = try parseArguments()
@@ -106,6 +159,9 @@ do {
 	let hmac = (nonce + queryData).hmac(key: secretData)
 	let token = (nonce + hmac).base64EncodedString()
 	let url = URL(string: "\(query)&\(token)", relativeTo: baseURL)!
+
+	// query AWS
+	let response = try request(url: url)
 }
 catch let error as ArgumentError {
 	print(error)
