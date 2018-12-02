@@ -10,7 +10,7 @@ $(DESTDIR)/SSHProxy.bundle/Contents/_CodeSignature/CodeResources: \
 	$(DESTDIR)/SSHProxy.bundle/Contents/MacOS/SSHProxy \
 	$(DESTDIR)/SSHProxy.bundle/Contents/Info.plist \
 	entitlements.plist
-	codesign -s "$(SIGNING_ID)" -i $(BUNDLE_ID) -o kill,hard,runtime --entitlements entitlements.plist $<
+	codesign -f -s "$(SIGNING_ID)" -i $(BUNDLE_ID) -o kill,hard,runtime --entitlements entitlements.plist $<
 
 $(DESTDIR)/SSHProxy.bundle/Contents/Info.plist: Info.plist
 	mkdir -p $(@D) && cp $< $@
