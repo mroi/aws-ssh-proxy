@@ -103,6 +103,7 @@ try {
 
 	case 'status':
 		// print public IPs of running VMs
+		header('Content-Type: text/plain');
 		$ip = $result->search("Reservations[].Instances[?State.Name=='running'][].PublicIpAddress | [0]");
 		if ($ip) {
 			$auth = base64_encode($nonce . hash_hmac('sha256', $nonce . $ip, $secret, true));
