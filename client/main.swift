@@ -11,13 +11,16 @@ enum ArgumentError: Error {
 }
 
 enum QueryError: Error {
-	case noRandom
 	case clientError(_: String)
 	case serverError(_: String)
 	case mimeType(_: String)
 	case noHTTPResponse
 	case noMimeType
 	case noData
+}
+
+enum InternalError: Error {
+	case noRandom
 }
 
 func parseArguments() throws -> (client: String, secret: String, server: String) {
@@ -70,7 +73,7 @@ func random(bytes: Int) throws -> Data {
 		SecRandomCopyBytes(kSecRandomDefault, bytes, $0)
 	}
 	guard result == errSecSuccess else {
-		throw QueryError.noRandom
+		throw InternalError.noRandom
 	}
 	return data
 }
@@ -168,7 +171,7 @@ catch let error as ArgumentError {
 	print("Usage: SSHProxy --client <name> --key <secret> --url <url>")
 	exit(EX_USAGE)
 }
-catch let error as QueryError {
+catch let error as InternalError {
 	print(error)
-	exit(EX_UNAVAILABLE)
+	exit(EX_SOFTWARE)
 }
