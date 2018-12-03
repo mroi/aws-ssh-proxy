@@ -145,6 +145,8 @@ func request(url: URL) throws -> (ip: String, token: String)? {
 }
 
 
+// MARK: - main code
+
 do {
 	let arguments = try parseArguments()
 
