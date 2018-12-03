@@ -16,6 +16,7 @@ enum QueryError: Error {
 	case clientError(_: String)
 	case serverError(_: String)
 	case mimeType(_: String)
+	case invalidResponse(_: (String, String))
 	case noHTTPResponse
 	case noMimeType
 	case noData
@@ -144,6 +145,9 @@ func request(url: URL) throws -> (ip: String, token: String)? {
 	return (String(pieces[0]), String(pieces[1]))
 }
 
+func forwardSSH(ip: String) {
+}
+
 
 // MARK: - main code
 
@@ -180,7 +184,14 @@ do {
 
 			// query AWS and check response
 			let response = try request(url: url)
-			if let response = response {
+			if let response = response, let ipData = response.ip.data(using: .ascii) {
+				let hmac = (nonce + ipData).hmac(key: secretData)
+				let token = (nonce + hmac).base64EncodedString()
+				if token == response.token {
+					forwardSSH(ip: response.ip)
+				} else {
+					throw QueryError.invalidResponse(response)
+				}
 			}
 		}
 		catch let error as QueryError {
