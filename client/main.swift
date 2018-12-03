@@ -150,7 +150,7 @@ do {
 	guard let queryData = query.data(using: .ascii) else {
 		throw ArgumentError.invalid(arguments.client)
 	}
-	guard let secretData = arguments.secret.data(using: .ascii) else {
+	guard let secretData = arguments.secret.data(using: .utf8) else {
 		throw ArgumentError.invalid(arguments.secret)
 	}
 	guard let baseURL = URL(string: arguments.server) else {
