@@ -2,6 +2,8 @@ import Foundation
 import Security
 import CommonCrypto
 import Dispatch
+import Darwin
+import os.log
 
 
 enum ArgumentError: Error {
@@ -20,6 +22,7 @@ enum QueryError: Error {
 }
 
 enum InternalError: Error {
+	case noBundleId
 	case noRandom
 }
 
@@ -145,7 +148,7 @@ func request(url: URL) throws -> (ip: String, token: String)? {
 do {
 	let arguments = try parseArguments()
 
-	// prepare static pieces
+	// prepare static data
 	let query = "status?\(arguments.client)"
 	guard let queryData = query.data(using: .ascii) else {
 		throw ArgumentError.invalid(arguments.client)
@@ -157,14 +160,40 @@ do {
 		throw ArgumentError.invalid(arguments.server)
 	}
 
-	// generate URL with authentication token
-	let nonce = try random(bytes: 10)
-	let hmac = (nonce + queryData).hmac(key: secretData)
-	let token = (nonce + hmac).base64EncodedString()
-	let url = URL(string: "\(query)&\(token)", relativeTo: baseURL)!
+	// schedule background activity
+	guard let bundleId = Bundle.main.bundleIdentifier else {
+		throw InternalError.noBundleId
+	}
+	let activity = NSBackgroundActivityScheduler(identifier: bundleId)
+	activity.interval = 5 * 60
+	activity.repeats = true
+	activity.qualityOfService = .utility
+	activity.schedule { done in
+		do {
+			// generate URL with authentication token
+			let nonce = try random(bytes: 10)
+			let hmac = (nonce + queryData).hmac(key: secretData)
+			let token = (nonce + hmac).base64EncodedString()
+			let url = URL(string: "\(query)&\(token)", relativeTo: baseURL)!
 
-	// query AWS
-	let response = try request(url: url)
+			// query AWS and check response
+			let response = try request(url: url)
+			if let response = response {
+			}
+		}
+		catch let error as QueryError {
+			if #available(macOS 10.12, *) {
+				os_log("%{public}s", String(reflecting: error))
+			}
+		}
+		catch {
+			exit(EX_SOFTWARE)
+		}
+
+		done(.finished)
+	}
+
+	dispatchMain()
 }
 catch let error as ArgumentError {
 	print(error)
