@@ -53,24 +53,24 @@ of `ssh-proxy`.
 
 The web service uses a pre-shared secret for request authentication. The authentication 
 token is formed by first generating a 10-byte random nonce. Then, a SHA256-HMAC is 
-calculated over the string `<nonce><command>?<client>`. The result is Base64-encoded and 
+calculated over the string `<nonce><command>?<endpoint>`. The result is Base64-encoded and 
 appended to the request URL. Therefore, you need to create a random secret that is shared 
-amongst all clients. Store this secret and optionally any other configuration in 
+amongst all machines. Store this secret and optionally any other configuration in 
 `config.php`.
 
-The web service understands three commands, all of which use a client machine identifier as 
-their query string:
+The web service understands three commands, all of which use an endpoint identifier as their 
+query string:
 
-**`/launch?<client>&<token>`**  
-Starts a new SSH proxy for the given client, waits until the proxy is running and returns 
+**`/launch?<endpoint>&<token>`**  
+Starts a new SSH proxy for the given endpoint, waits until the proxy is running and returns 
 its IP address. When a proxy is already running, only the IP address is returned.
 
-**`/status?<client>&<token>`**  
+**`/status?<endpoint>&<token>`**  
 Returns the public IP address of the SSH proxy when such a proxy has been started for the 
-given client. An authentication token similar to the one used for requests is generated to 
+given endpoint. An authentication token similar to the one used for requests is generated to 
 verify the IP address. The same nonce is used to prevent replay attacks.
 
-**`/terminate?<client>&<token>`**  
+**`/terminate?<endpoint>&<token>`**  
 Terminates the running SSH proxy.
 
 Launch Daemon for Endpoint Machines

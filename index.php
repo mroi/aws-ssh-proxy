@@ -5,8 +5,8 @@ require('aws.phar');
 // extract request details
 $command = explode('?', $_SERVER['REQUEST_URI'])[0];
 $command = trim($command, '/');
-$client = explode('&', $_SERVER['QUERY_STRING'])[0];
-$client = preg_replace('/[^A-Za-z0-9]/', '', $client);
+$endpoint = explode('&', $_SERVER['QUERY_STRING'])[0];
+$endpoint = preg_replace('/[^A-Za-z0-9]/', '', $endpoint);
 $auth = explode('&', $_SERVER['QUERY_STRING'])[1];
 $auth = base64_decode($auth);
 $nonce = substr($auth, 0, 10);
@@ -17,7 +17,7 @@ $region = isset($region) ? $region : getenv('AWS_DEFAULT_REGION');
 $secret = isset($secret) ? $secret : exit();
 
 // check request authentication
-if (!hash_equals($hmac, hash_hmac('sha256', $nonce . $command . '?' . $client, $secret, true))) {
+if (!hash_equals($hmac, hash_hmac('sha256', $nonce . $command . '?' . $endpoint, $secret, true))) {
 	header($_SERVER['SERVER_PROTOCOL'] . ' 401 Unauthorized');
 	exit();
 }
@@ -33,7 +33,7 @@ try {
 		'Filters' => [
 			[
 				'Name' => 'tag:ssh-proxy',
-				'Values' => [$client]
+				'Values' => [$endpoint]
 			]
 		]
 	]);
@@ -78,7 +78,7 @@ try {
 						'Tags' => [
 							[
 								'Key' => 'ssh-proxy',
-								'Value' => $client
+								'Value' => $endpoint
 							]
 						]
 					]

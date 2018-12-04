@@ -9,8 +9,8 @@
 	<key>ProgramArguments</key>
 	<array>
 		<string>${DESTDIR}/SSHProxy.bundle/Contents/MacOS/SSHProxy</string>
-		<string>--client</string>
-		<string>${CLIENT:-$(scutil --get LocalHostName)}</string>
+		<string>--endpoint</string>
+		<string>${ENDPOINT:-$(scutil --get LocalHostName)}</string>
 		<string>--key</string>
 		<string>${KEY:-$(php -r 'include "../config.php"; echo $secret;')}</string>
 		<string>--url</string>

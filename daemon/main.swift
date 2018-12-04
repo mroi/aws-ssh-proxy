@@ -35,48 +35,48 @@ enum RequestResult {
 }
 
 
-func parseArguments() throws -> (client: String, secret: String, server: String) {
+func parseArguments() throws -> (endpoint: String, key: String, url: String) {
 	let arguments = CommandLine.arguments.dropFirst()
 	var iterator = arguments.makeIterator()
 
-	var clientArgument: String?
-	var secretArgument: String?
-	var serverArgument: String?
+	var endpointArgument: String?
+	var keyArgument: String?
+	var urlArgument: String?
 
 	while let argument = iterator.next() {
 		switch argument {
-		case "--client":
-			clientArgument = iterator.next()
+		case "--endpoint":
+			endpointArgument = iterator.next()
 		case "--key":
-			secretArgument = iterator.next()
+			keyArgument = iterator.next()
 		case "--url":
-			serverArgument = iterator.next()
+			urlArgument = iterator.next()
 		default:
 			throw ArgumentError.unknown(argument)
 		}
 	}
 
-	let clientArgumentSanitized = clientArgument?.unicodeScalars.filter {
+	let endpointArgumentSanitized = endpointArgument?.unicodeScalars.filter {
 		CharacterSet.alphanumerics.contains($0)
 	}
-	if let sanitized = clientArgumentSanitized {
-		clientArgument = String(sanitized)
+	if let sanitized = endpointArgumentSanitized {
+		endpointArgument = String(sanitized)
 	}
-	while serverArgument?.hasSuffix("/") ?? false {
-		serverArgument = String(serverArgument!.dropLast())
+	while urlArgument?.hasSuffix("/") ?? false {
+		urlArgument = String(urlArgument!.dropLast())
 	}
 
-	guard let client = clientArgument else {
-		throw ArgumentError.missing("--client")
+	guard let endpoint = endpointArgument else {
+		throw ArgumentError.missing("--endpoint")
 	}
-	guard let secret = secretArgument else {
+	guard let key = keyArgument else {
 		throw ArgumentError.missing("--key")
 	}
-	guard let server = serverArgument else {
+	guard let url = urlArgument else {
 		throw ArgumentError.missing("--url")
 	}
 
-	return (client, secret, server)
+	return (endpoint, key, url)
 }
 
 func random(bytes: Int) throws -> Data {
@@ -158,15 +158,15 @@ do {
 	let arguments = try parseArguments()
 
 	// prepare static data
-	let query = "status?\(arguments.client)"
+	let query = "status?\(arguments.endpoint)"
 	guard let queryData = query.data(using: .ascii) else {
-		throw ArgumentError.invalid(arguments.client)
+		throw ArgumentError.invalid(arguments.endpoint)
 	}
-	guard let secretData = arguments.secret.data(using: .utf8) else {
-		throw ArgumentError.invalid(arguments.secret)
+	guard let keyData = arguments.key.data(using: .utf8) else {
+		throw ArgumentError.invalid(arguments.key)
 	}
-	guard let baseURL = URL(string: arguments.server) else {
-		throw ArgumentError.invalid(arguments.server)
+	guard let baseURL = URL(string: arguments.url) else {
+		throw ArgumentError.invalid(arguments.url)
 	}
 
 	// schedule background activity
@@ -183,7 +183,7 @@ do {
 			print(InternalError.noRandom)
 			exit(EX_SOFTWARE)
 		}
-		let hmac = (nonce + queryData).hmac(key: secretData)
+		let hmac = (nonce + queryData).hmac(key: keyData)
 		let token = (nonce + hmac).base64EncodedString()
 		let url = URL(string: "\(query)&\(token)", relativeTo: baseURL)!
 
@@ -198,7 +198,7 @@ do {
 					guard let ipData = forward.ip.data(using: .ascii) else {
 						throw RequestError.invalidResponse(String(forward.ip))
 					}
-					let hmac = (nonce + ipData).hmac(key: secretData)
+					let hmac = (nonce + ipData).hmac(key: keyData)
 					let token = (nonce + hmac).base64EncodedString()
 					guard token == forward.token else {
 						throw RequestError.unauthorized(forward)
@@ -220,7 +220,7 @@ do {
 }
 catch let error as ArgumentError {
 	print(error)
-	print("Usage: SSHProxy --client <name> --key <secret> --url <url>")
+	print("Usage: SSHProxy --endpoint <name> --key <secret> --url <url>")
 	exit(EX_USAGE)
 }
 catch let error as InternalError {
