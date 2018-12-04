@@ -19,7 +19,7 @@ $(DESTDIR)/SSHProxy.bundle/Contents/MacOS/SSHProxy: .build/release/SSHProxy
 	mkdir -p $(@D) && cp $< $@
 
 .build/release/SSHProxy: $(wildcard *.swift)
-	swift build -c release --static-swift-stdlib
+	swift build -c release --static-swift-stdlib -Xswiftc -target -Xswiftc x86_64-apple-macos10.13
 
 clean:
 	rm -rf .build

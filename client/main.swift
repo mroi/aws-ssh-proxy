@@ -210,9 +210,7 @@ do {
 				}
 			}
 			catch {
-				if #available(macOS 10.12, *) {
-					os_log("%{public}s", String(reflecting: error))
-				}
+				os_log("%{public}s", String(reflecting: error))
 			}
 			done(.finished)
 		}
