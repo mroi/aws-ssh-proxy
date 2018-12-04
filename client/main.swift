@@ -12,20 +12,28 @@ enum ArgumentError: Error {
 	case invalid(_: String)
 }
 
-enum QueryError: Error {
-	case clientError(_: String)
-	case serverError(_: String)
-	case mimeType(_: String)
-	case invalidResponse(_: (String, String))
-	case noHTTPResponse
-	case noMimeType
-	case noData
-}
-
 enum InternalError: Error {
 	case noBundleId
 	case noRandom
 }
+
+enum RequestError: Error {
+	case clientError(_: String)
+	case serverError(_: String)
+	case mimeType(_: String)
+	case invalidResponse(_: String)
+	case unauthorized(_: (Substring, Substring))
+	case noHTTPResponse
+	case noMimeType
+	case noResponse
+}
+
+enum RequestResult {
+	case nothing
+	case forward(ip: Substring, token: Substring)
+	case error(_: RequestError)
+}
+
 
 func parseArguments() throws -> (client: String, secret: String, server: String) {
 	let arguments = CommandLine.arguments.dropFirst()
@@ -99,53 +107,48 @@ extension Data {
 	}
 }
 
-func request(url: URL) throws -> (ip: String, token: String)? {
-	let completion = DispatchSemaphore(value: 0)
-	var requestError: QueryError?
-	var result: String?
-
+func request(url: URL, _ done: @escaping (RequestResult) -> Void) -> Void {
 	let task = URLSession.shared.dataTask(with: url) { data, response, error in
-		defer { completion.signal() }
 		guard error == nil else {
-			requestError = QueryError.clientError(error!.localizedDescription)
+			done(.error(.clientError(error!.localizedDescription)))
 			return
 		}
 		guard let httpResponse = response as? HTTPURLResponse else {
-			requestError = QueryError.noHTTPResponse
+			done(.error(.noHTTPResponse))
 			return
 		}
 		guard (200...299).contains(httpResponse.statusCode) else {
-			requestError = QueryError.serverError(String(httpResponse.statusCode))
+			done(.error(.serverError(String(httpResponse.statusCode))))
 			return
 		}
 		guard let mimeType = httpResponse.mimeType else {
-			requestError = QueryError.noMimeType
+			done(.error(.noMimeType))
 			return
 		}
 		guard mimeType == "text/plain" else {
-			requestError = QueryError.mimeType(mimeType)
+			done(.error(.mimeType(mimeType)))
 			return
 		}
-		guard let data = data, let string = String(data: data, encoding: .utf8) else {
-			requestError = QueryError.noData
+		guard let data = data, let response = String(data: data, encoding: .utf8) else {
+			done(.error(.noResponse))
 			return
 		}
 
-		result = string
+		let pieces = response.split(separator: " ", maxSplits: 1)
+		switch pieces.count {
+		case 0:
+			done(.nothing)
+		case 2:
+			done(.forward(ip: pieces[0], token: pieces[1]))
+		default:
+			done(.error(.invalidResponse(response)))
+		}
+		return
 	}
 	task.resume()
-	completion.wait()
-
-	if requestError != nil {
-		throw requestError!
-	}
-	guard let pieces = result?.split(separator: " ", maxSplits: 1), pieces.count == 2 else {
-			return nil
-	}
-	return (String(pieces[0]), String(pieces[1]))
 }
 
-func forwardSSH(ip: String) {
+func forwardSSH(ip: Substring) {
 }
 
 
@@ -175,35 +178,44 @@ do {
 	activity.repeats = true
 	activity.qualityOfService = .utility
 	activity.schedule { done in
-		do {
-			// generate URL with authentication token
-			let nonce = try random(bytes: 10)
-			let hmac = (nonce + queryData).hmac(key: secretData)
-			let token = (nonce + hmac).base64EncodedString()
-			let url = URL(string: "\(query)&\(token)", relativeTo: baseURL)!
-
-			// query AWS and check response
-			let response = try request(url: url)
-			if let response = response, let ipData = response.ip.data(using: .ascii) {
-				let hmac = (nonce + ipData).hmac(key: secretData)
-				let token = (nonce + hmac).base64EncodedString()
-				if token == response.token {
-					forwardSSH(ip: response.ip)
-				} else {
-					throw QueryError.invalidResponse(response)
-				}
-			}
-		}
-		catch let error as QueryError {
-			if #available(macOS 10.12, *) {
-				os_log("%{public}s", String(reflecting: error))
-			}
-		}
-		catch {
+		// generate URL with authentication token
+		guard let nonce = try? random(bytes: 10) else {
+			print(InternalError.noRandom)
 			exit(EX_SOFTWARE)
 		}
+		let hmac = (nonce + queryData).hmac(key: secretData)
+		let token = (nonce + hmac).base64EncodedString()
+		let url = URL(string: "\(query)&\(token)", relativeTo: baseURL)!
 
-		done(.finished)
+		// query AWS and check response
+		request(url: url) { result in
+			do {
+				switch result {
+				case .nothing:
+					break
+
+				case .forward(let forward):
+					guard let ipData = forward.ip.data(using: .ascii) else {
+						throw RequestError.invalidResponse(String(forward.ip))
+					}
+					let hmac = (nonce + ipData).hmac(key: secretData)
+					let token = (nonce + hmac).base64EncodedString()
+					guard token == forward.token else {
+						throw RequestError.unauthorized(forward)
+					}
+					forwardSSH(ip: forward.ip)
+
+				case .error(let error):
+					throw error
+				}
+			}
+			catch {
+				if #available(macOS 10.12, *) {
+					os_log("%{public}s", String(reflecting: error))
+				}
+			}
+			done(.finished)
+		}
 	}
 
 	dispatchMain()
