@@ -42,21 +42,22 @@ steps. You will find everything you need for this setup in the
 PHP Web Service
 ---------------
 
-You need to obtain the latest `aws.phar` from the [AWS SDK 
-releases](https://github.com/aws/aws-sdk-php/releases). Then put it next to the 
-[`index.php`](https://github.com/mroi/aws-ssh-proxy/blob/master/index.php) on your web 
-server.
+To install the web service, you need PHP-enabled web space. Follow these steps:
 
-Make sure your web server also has the credentials of the `ssh-proxy` IAM account stored in 
-its `~/.aws/credentials` file or wherever you keep your AWS credentials. Use a profile name 
-of `ssh-proxy`.
+1. Put [`index.php`](https://github.com/mroi/aws-ssh-proxy/blob/master/index.php) and 
+   [`.htaccess`](https://github.com/mroi/aws-ssh-proxy/blob/master/.htaccess) on your web 
+   server.
+2. Obtain the latest `aws.phar` from the [AWS SDK 
+   releases](https://github.com/aws/aws-sdk-php/releases) and put it next to `index.php`.
+3. Make sure your web server also has the credentials of the `ssh-proxy` IAM account stored 
+   in its `~/.aws/credentials` file or wherever you keep your AWS credentials. Use a profile 
+   name of `ssh-proxy`.
+4. The web service uses a pre-shared secret for request authentication. Store this secret 
+   and optionally any other configuration in `config.php`.
 
-The web service uses a pre-shared secret for request authentication. The authentication 
-token is formed by first generating a 10-byte random nonce. Then, a SHA256-HMAC is 
-calculated over the string `<nonce><command>?<endpoint>`. The result is Base64-encoded and 
-appended to the request URL. Therefore, you need to create a random secret that is shared 
-amongst all machines. Store this secret and optionally any other configuration in 
-`config.php`.
+An authentication token is formed by first generating a 10-byte random nonce. Then, a 
+SHA256-HMAC is calculated over the string `<nonce><command>?<endpoint>`. The result is 
+Base64-encoded and appended to the request URL.
 
 The web service understands three commands, all of which use an endpoint identifier as their 
 query string:
