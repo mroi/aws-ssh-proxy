@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+	<key>Label</key>
+	<string>${BUNDLE_ID}</string>
+	<key>UserName</key>
+	<string>${USERNAME:-$(id -nu)}</string>
+	<key>ProgramArguments</key>
+	<array>
+		<string>${DESTDIR}/SSHProxy.bundle/Contents/MacOS/SSHProxy</string>
+		<string>--client</string>
+		<string>${CLIENT:-$(scutil --get LocalHostName)}</string>
+		<string>--key</string>
+		<string>${KEY:-$(php -r 'include "../config.php"; echo $secret;')}</string>
+		<string>--url</string>
+		<string>${URL:-$(php -r 'include "../config.php"; echo $url;')}</string>
+	</array>
+	<key>EnablePressuredExit</key>
+	<true/>
+	<key>StartInterval</key>
+	<integer>300</integer>
+</dict>
+</plist>

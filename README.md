@@ -12,7 +12,7 @@ service for remote management using an SSH command line.
 The system consists of four pieces:
 * some initial setup at Amazon,
 * a web service you need to host on a PHP-enabled web server,
-* a launchd daemon for the Macs you want to connect to, and
+* a launch daemon for the Macs you want to connect to, and
 * an SSH proxy script for the machine that establishes the connection.
 
 Each of these pieces is described below in its own section.
@@ -72,6 +72,20 @@ verify the IP address. The same nonce is used to prevent replay attacks.
 
 **`/terminate?<client>&<token>`**  
 Terminates the running SSH proxy.
+
+Launch Daemon for Endpoint Machines
+-----------------------------------
+
+All the machines that you want to SSH into must run a launch daemon. This daemon regularly 
+queries the status of the EC2 VMs using the PHP service. A running VM signifies a connection 
+request and the daemon will forward its local SSH port to the VM.
+
+1. You install the launch daemon by invoking `make` in the 
+   [`daemon`](https://github.com/mroi/aws-ssh-proxy/blob/master/daemon/) directory. You can 
+   override variables (`DESTDIR`, `SIGNING_ID`, …) to configure the installation.
+2. Register the daemon with launchd by copying the included plist file from 
+   `SSHProxy.bundle/Contents/Resources` to `/Library/LaunchDaemons/`. You may want to 
+   customize the file if the defaults don’t suit your needs.
 
 This work is licensed under the [WTFPL](http://www.wtfpl.net/), so you can do anything you 
 want with it.

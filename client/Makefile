@@ -2,6 +2,8 @@ DESTDIR ?= /Users/Shared/Library/CoreServices
 SIGNING_ID ?= $(shell id -F)
 BUNDLE_ID = $(shell PlistBuddy -c 'Print CFBundleIdentifier' Info.plist)
 
+export DESTDIR BUNDLE_ID
+
 .PHONY: all clean cleanall
 
 all: $(DESTDIR)/SSHProxy.bundle/Contents/_CodeSignature/CodeResources
@@ -9,6 +11,7 @@ all: $(DESTDIR)/SSHProxy.bundle/Contents/_CodeSignature/CodeResources
 $(DESTDIR)/SSHProxy.bundle/Contents/_CodeSignature/CodeResources: \
 	$(DESTDIR)/SSHProxy.bundle/Contents/MacOS/SSHProxy \
 	$(DESTDIR)/SSHProxy.bundle/Contents/Info.plist \
+	$(DESTDIR)/SSHProxy.bundle/Contents/Resources/$(BUNDLE_ID).plist \
 	entitlements.plist
 	codesign -f -s "$(SIGNING_ID)" -i $(BUNDLE_ID) -o kill,hard,runtime --entitlements entitlements.plist $<
 
@@ -17,6 +20,10 @@ $(DESTDIR)/SSHProxy.bundle/Contents/Info.plist: Info.plist
 
 $(DESTDIR)/SSHProxy.bundle/Contents/MacOS/SSHProxy: .build/release/SSHProxy
 	mkdir -p $(@D) && cp $< $@
+
+$(DESTDIR)/SSHProxy.bundle/Contents/Resources/$(BUNDLE_ID).plist: launchd.plist Info.plist ../config.php
+	mkdir -p $(@D)
+	eval "`echo "cat << EOF\n$$(<$<)\nEOF"`" > $@
 
 .build/release/SSHProxy: $(wildcard *.swift)
 	swift build -c release --static-swift-stdlib -Xswiftc -target -Xswiftc x86_64-apple-macos10.13
