@@ -210,7 +210,7 @@ do {
 				}
 			}
 			catch {
-				os_log("%{public}s", String(reflecting: error))
+				os_log("%{public}s", type: .error, String(reflecting: error))
 			}
 			done(.finished)
 		}
