@@ -4,6 +4,6 @@ import PackageDescription
 let package = Package(
 	name: "SSHProxy",
 	targets: [
-		.target(name: "SSHProxy", path: ".")
+		.target(name: "SSHProxy", path: ".", exclude: ["sandbox.c"])
 	]
 )

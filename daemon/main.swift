@@ -5,6 +5,8 @@ import Dispatch
 import Darwin
 import os.log
 
+sandbox(bundlePath: Bundle.main.bundlePath)
+
 
 enum ArgumentError: Error {
 	case unknown(_: String)
