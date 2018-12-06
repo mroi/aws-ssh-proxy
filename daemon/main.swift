@@ -109,8 +109,10 @@ extension Data {
 	}
 }
 
+let session = URLSession(configuration: .ephemeral)
+
 func request(url: URL, _ done: @escaping (RequestResult) -> Void) -> Void {
-	let task = URLSession.shared.dataTask(with: url) { data, response, error in
+	let task = session.dataTask(with: url) { data, response, error in
 		guard error == nil else {
 			done(.error(.clientError(error!.localizedDescription)))
 			return
