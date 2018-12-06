@@ -27,6 +27,7 @@ $(DESTDIR)/SSHProxy.bundle/Contents/Resources/$(BUNDLE_ID).plist: launchd.plist 
 	eval "`echo "cat << EOF\n$$(<$<)\nEOF"`" > $@
 
 .build/release/SSHProxy: .build/release/SSHProxy.build/sandbox.o $(wildcard *.swift)
+	rm -f $@
 	swift build -c release --static-swift-stdlib \
 		$(foreach flag,$(SWIFTFLAGS),-Xswiftc $(flag)) -Xlinker $<
 
