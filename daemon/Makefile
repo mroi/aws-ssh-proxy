@@ -1,6 +1,7 @@
 DESTDIR ?= /Users/Shared/Library/CoreServices
 SIGNING_ID ?= $(shell id -F)
 BUNDLE_ID = $(shell PlistBuddy -c 'Print CFBundleIdentifier' Info.plist)
+SWIFTFLAGS := -target x86_64-apple-macos10.13 $(SWIFTFLAGS)
 
 export DESTDIR BUNDLE_ID
 
@@ -26,7 +27,8 @@ $(DESTDIR)/SSHProxy.bundle/Contents/Resources/$(BUNDLE_ID).plist: launchd.plist 
 	eval "`echo "cat << EOF\n$$(<$<)\nEOF"`" > $@
 
 .build/release/SSHProxy: $(wildcard *.swift)
-	swift build -c release --static-swift-stdlib -Xswiftc -target -Xswiftc x86_64-apple-macos10.13
+	swift build -c release --static-swift-stdlib \
+		$(foreach flag,$(SWIFTFLAGS),-Xswiftc $(flag))
 
 clean:
 	rm -rf .build
