@@ -14,15 +14,22 @@ static const char profile[] =
 	"(allow file-read-metadata)\n"
 	"(allow file-read* (subpath bundle-path))\n"
 	"(allow file-read* (require-all (file-mode #o0004)(require-not (subpath \"/Users\"))))\n"
-	"(allow file-read* (regex #\"^/Users/[^/]+/Library/Preferences/(ByHost/)?(\\.GlobalPreferences|com\\.apple\\.security)\\..*plist$\"))\n"
-	"(allow file-read* file-write* (subpath \"/private/var/folders\"))\n"
-	"(allow ipc-posix-shm* (ipc-posix-name \"com.apple.AppleDatabaseChanged\"))\n"
-	"(allow mach-lookup (global-name \"com.apple.CoreServices.coreservicesd\"))\n"
-	"(allow mach-lookup (global-name \"com.apple.SecurityServer\"))\n"
-	"(allow mach-lookup (global-name \"com.apple.lsd.mapdb\"))\n"
-	"(allow mach-lookup (global-name-regex #\"^com\\.apple\\.distributed_notifications\"))\n"
+	// required access to preferences
 	"(allow user-preference-read (preference-domain \"kCFPreferencesAnyApplication\"))\n"
 	"(allow user-preference-read (preference-domain \"com.apple.security\"))\n"
+	"(allow file-read* (regex #\"^/Users/[^/]+/Library/Preferences/(ByHost/)?(\\.GlobalPreferences|com\\.apple\\.security)\\..*plist$\"))\n"
+	// ancient calls to CSSM access the MDS database in /private/var/folders
+	"(allow file-read* file-write* (subpath \"/private/var/folders\"))\n"
+	"(allow ipc-posix-shm* (ipc-posix-name \"com.apple.AppleDatabaseChanged\"))\n"
+	// URLSession checks some filesystem properties when initializing the HSTS store
+	"(allow mach-lookup (global-name \"com.apple.CoreServices.coreservicesd\"))\n"
+	// certificate validation
+	"(allow mach-lookup (global-name \"com.apple.SecurityServer\"))\n"
+	// UTI enumeration due to MIME type in HTTPURLResponse
+	"(allow mach-lookup (global-name \"com.apple.lsd.mapdb\"))\n"
+	// system notification bus
+	"(allow mach-lookup (global-name-regex #\"^com\\.apple\\.distributed_notifications\"))\n"
+	// networking and related daemon sockets (like mDNSResponder)
 	"(allow network-outbound (remote ip) (subpath \"/private/var/run\"))\n"
 	"(system-network)\n";
 
