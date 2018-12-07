@@ -12,7 +12,7 @@ SIGNING_ID ?= $(shell id -F)
 SWIFTFLAGS := -target x86_64-apple-macos10.13 -import-objc-header sandbox.h $(SWIFTFLAGS)
 CFLAGS := -O2 -Wall -mmacosx-version-min=10.13 $(CFLAGS)
 
-.PHONY: all clean cleanall
+.PHONY: all run log clean cleanall
 
 all: $(DESTDIR)/SSHProxy.bundle/Contents/_CodeSignature/CodeResources
 
@@ -39,6 +39,13 @@ $(DESTDIR)/SSHProxy.bundle/Contents/Resources/$(BUNDLE_ID).plist: launchd.plist 
 
 .build/release/SSHProxy.build/sandbox.o: sandbox.c sandbox.h
 	mkdir -p $(@D) && $(CC) $(CFLAGS) $(LDFLAGS) -c -o $@ $<
+
+run: all
+	$(DESTDIR)/SSHProxy.bundle/Contents/MacOS/SSHProxy \
+		--endpoint $(ENDPOINT) --key $(KEY) --url $(URL)
+
+log:
+	@log stream --predicate '(process == "SSHProxy") or (eventMessage contains "SSHProxy")'
 
 clean:
 	rm -rf .build
