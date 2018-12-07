@@ -136,7 +136,7 @@ func request(url: URL, _ done: @escaping (RequestResult) -> Void) -> Void {
 			return
 		}
 
-		let pieces = response.split(separator: " ", maxSplits: 1)
+		let pieces = response.trimmingCharacters(in: .newlines).split(separator: " ", maxSplits: 1)
 		switch pieces.count {
 		case 0:
 			done(.nothing)
