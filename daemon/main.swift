@@ -109,6 +109,14 @@ extension Data {
 	}
 }
 
+extension StringProtocol where Index == String.Index {
+	func token(key: Data, nonce: Data) -> String? {
+		guard let data = data(using: .ascii) else { return nil }
+		let hmac = (nonce + data).hmac(key: key)
+		return (nonce + hmac).base64EncodedString()
+	}
+}
+
 let session = URLSession(configuration: .ephemeral)
 
 func request(url: URL, _ done: @escaping (RequestResult) -> Void) -> Void {
@@ -187,8 +195,7 @@ do {
 			print(InternalError.noRandom)
 			exit(EX_SOFTWARE)
 		}
-		let hmac = (nonce + queryData).hmac(key: keyData)
-		let token = (nonce + hmac).base64EncodedString()
+		let token = query.token(key: keyData, nonce: nonce)!
 		let url = URL(string: "\(query)&\(token)", relativeTo: baseURL)!
 
 		// query AWS and check response
@@ -199,11 +206,9 @@ do {
 					break
 
 				case .forward(let forward):
-					guard let ipData = forward.ip.data(using: .ascii) else {
+					guard let token = forward.ip.token(key: keyData, nonce: nonce) else {
 						throw RequestError.invalidResponse(String(forward.ip))
 					}
-					let hmac = (nonce + ipData).hmac(key: keyData)
-					let token = (nonce + hmac).base64EncodedString()
 					guard token == forward.token else {
 						throw RequestError.unauthorized(forward)
 					}
