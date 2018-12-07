@@ -22,11 +22,9 @@ enum InternalError: Error {
 enum RequestError: Error {
 	case clientError(_: String)
 	case serverError(_: String)
-	case mimeType(_: String)
 	case invalidResponse(_: String)
 	case unauthorized(_: (Substring, Substring))
 	case noHTTPResponse
-	case noMimeType
 	case noResponse
 }
 
@@ -133,14 +131,6 @@ func request(url: URL, _ done: @escaping (RequestResult) -> Void) -> Void {
 			done(.error(.serverError(String(httpResponse.statusCode))))
 			return
 		}
-		guard let mimeType = httpResponse.mimeType else {
-			done(.error(.noMimeType))
-			return
-		}
-		guard mimeType == "text/plain" else {
-			done(.error(.mimeType(mimeType)))
-			return
-		}
 		guard let data = data, let response = String(data: data, encoding: .utf8) else {
 			done(.error(.noResponse))
 			return
@@ -171,8 +161,7 @@ do {
 	let arguments = try parseArguments()
 
 	// prepare static data
-	let query = "status?\(arguments.endpoint)"
-	guard let queryData = query.data(using: .ascii) else {
+	guard let _ = arguments.endpoint.data(using: .ascii) else {
 		throw ArgumentError.invalid(arguments.endpoint)
 	}
 	guard let keyData = arguments.key.data(using: .utf8) else {
@@ -196,6 +185,7 @@ do {
 			print(InternalError.noRandom)
 			exit(EX_SOFTWARE)
 		}
+		let query = "status?\(arguments.endpoint)"
 		let token = query.token(key: keyData, nonce: nonce)!
 		let url = URL(string: "\(query)&\(token)", relativeTo: baseURL)!
 
@@ -214,7 +204,12 @@ do {
 						throw RequestError.unauthorized(forward)
 					}
 					forwardSSH(ip: forward.ip) {
-						done(.finished)
+						let query = "terminate?\(arguments.endpoint)"
+						let token = query.token(key: keyData, nonce: nonce)!
+						let url = URL(string: "\(query)&\(token)", relativeTo: baseURL)!
+						request(url: url) { _ in
+							done(.finished)
+						}
 					}
 					return
 
