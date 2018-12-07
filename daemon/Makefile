@@ -1,10 +1,16 @@
-DESTDIR ?= /Users/Shared/Library/CoreServices
-SIGNING_ID ?= $(shell id -F)
 BUNDLE_ID = $(shell PlistBuddy -c 'Print CFBundleIdentifier' Info.plist)
+DESTDIR ?= /Users/Shared/Library/CoreServices
+ENDPOINT ?= $(shell scutil --get LocalHostName)
+KEY ?= $(shell php -r 'include "../config.php"; echo $$secret;')
+URL ?= $(shell php -r 'include "../config.php"; echo $$url;')
+USERNAME ?= $(shell id -nu)
+
+# used to fill in launchd.plist
+export BUNDLE_ID DESTDIR ENDPOINT KEY URL USERNAME
+
+SIGNING_ID ?= $(shell id -F)
 SWIFTFLAGS := -target x86_64-apple-macos10.13 -import-objc-header sandbox.h $(SWIFTFLAGS)
 CFLAGS := -O2 -Wall -mmacosx-version-min=10.13 $(CFLAGS)
-
-export DESTDIR BUNDLE_ID
 
 .PHONY: all clean cleanall
 

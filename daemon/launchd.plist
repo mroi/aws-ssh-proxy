@@ -5,16 +5,16 @@
 	<key>Label</key>
 	<string>${BUNDLE_ID}</string>
 	<key>UserName</key>
-	<string>${USERNAME:-$(id -nu)}</string>
+	<string>${USERNAME}</string>
 	<key>ProgramArguments</key>
 	<array>
 		<string>${DESTDIR}/SSHProxy.bundle/Contents/MacOS/SSHProxy</string>
 		<string>--endpoint</string>
-		<string>${ENDPOINT:-$(scutil --get LocalHostName)}</string>
+		<string>${ENDPOINT}</string>
 		<string>--key</string>
-		<string>${KEY:-$(php -r 'include "../config.php"; echo $secret;')}</string>
+		<string>${KEY}</string>
 		<string>--url</string>
-		<string>${URL:-$(php -r 'include "../config.php"; echo $url;')}</string>
+		<string>${URL}</string>
 	</array>
 	<key>EnablePressuredExit</key>
 	<true/>
