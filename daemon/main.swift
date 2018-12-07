@@ -145,7 +145,6 @@ func request(url: URL, _ done: @escaping (RequestResult) -> Void) -> Void {
 		default:
 			done(.error(.invalidResponse(response)))
 		}
-		return
 	}
 	task.resume()
 }
