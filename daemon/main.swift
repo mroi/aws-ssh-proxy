@@ -224,7 +224,7 @@ do {
 		}
 	}
 
-	dispatchMain()
+	RunLoop.main.run()
 }
 catch let error as ArgumentError {
 	print(error)
