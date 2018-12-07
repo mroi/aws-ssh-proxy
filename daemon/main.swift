@@ -160,7 +160,8 @@ func request(url: URL, _ done: @escaping (RequestResult) -> Void) -> Void {
 	task.resume()
 }
 
-func forwardSSH(ip: Substring) {
+func forwardSSH(ip: Substring, _ done: @escaping () -> Void) {
+	done()
 }
 
 
@@ -212,7 +213,10 @@ do {
 					guard token == forward.token else {
 						throw RequestError.unauthorized(forward)
 					}
-					forwardSSH(ip: forward.ip)
+					forwardSSH(ip: forward.ip) {
+						done(.finished)
+					}
+					return
 
 				case .error(let error):
 					throw error
