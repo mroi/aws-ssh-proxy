@@ -7,6 +7,13 @@ import os.log
 
 sandbox(bundlePath: Bundle.main.bundlePath)
 
+// configure URLSession without permanent storage
+let config = URLSessionConfiguration.ephemeral
+config.httpCookieAcceptPolicy = .never
+config.httpShouldSetCookies = false
+config.urlCache = nil
+let session = URLSession(configuration: config)
+
 
 enum ArgumentError: Error {
 	case unknown(_: String)
@@ -115,8 +122,6 @@ extension StringProtocol where Index == String.Index {
 	}
 }
 
-let session = URLSession(configuration: .ephemeral)
-
 func request(url: URL, _ done: @escaping (RequestResult) -> Void) -> Void {
 	let task = session.dataTask(with: url) { data, response, error in
 		guard error == nil else {
@@ -147,6 +152,7 @@ func request(url: URL, _ done: @escaping (RequestResult) -> Void) -> Void {
 			done(.error(.invalidResponse(response)))
 		}
 	}
+	task.countOfBytesClientExpectsToReceive = 1024
 	task.resume()
 }
 
