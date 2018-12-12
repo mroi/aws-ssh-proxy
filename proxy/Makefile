@@ -1,4 +1,4 @@
-BUNDLE_ID = $(shell PlistBuddy -c 'Print CFBundleIdentifier' Info.plist)
+BUNDLE_ID = $(shell PlistBuddy -c 'Print CFBundleIdentifier' resources/Info.plist)
 DESTDIR ?= /Users/Shared/Library/CoreServices
 ENDPOINT ?= $(shell scutil --get LocalHostName)
 KEY ?= $(shell php -r 'include "../config.php"; echo $$secret;')
@@ -22,13 +22,13 @@ $(DESTDIR)/SSHProxy.bundle/Contents/_CodeSignature/CodeResources: \
 	$(DESTDIR)/SSHProxy.bundle/Contents/Resources/$(BUNDLE_ID).plist
 	codesign -f --deep -s "$(SIGNING_ID)" -i $(BUNDLE_ID) -o kill,hard,runtime $(DESTDIR)/SSHProxy.bundle
 
-$(DESTDIR)/SSHProxy.bundle/Contents/Info.plist: Info.plist
+$(DESTDIR)/SSHProxy.bundle/Contents/Info.plist: resources/Info.plist
 	mkdir -p $(@D) && cp $< $@
 
 $(DESTDIR)/SSHProxy.bundle/Contents/MacOS/ssh-forward: .build/release/ssh-forward
 	mkdir -p $(@D) && cp $< $@
 
-$(DESTDIR)/SSHProxy.bundle/Contents/Resources/$(BUNDLE_ID).plist: launchd.plist Info.plist ../config.php
+$(DESTDIR)/SSHProxy.bundle/Contents/Resources/$(BUNDLE_ID).plist: resources/launchd.plist resources/Info.plist ../config.php
 	mkdir -p $(@D)
 	eval "`echo "cat << EOF\n$$(<$<)\nEOF"`" > $@
 
