@@ -122,8 +122,10 @@ extension StringProtocol where Index == String.Index {
 	}
 }
 
-func request(url: URL, _ done: @escaping (RequestResult) -> Void) -> Void {
-	let task = session.dataTask(with: url) { data, response, error in
+func request(url: URL, method: String = "GET", _ done: @escaping (RequestResult) -> Void) -> Void {
+	var request = URLRequest(url: url)
+	request.httpMethod = method
+	let task = session.dataTask(with: request) { data, response, error in
 		guard error == nil else {
 			done(.error(.clientError(error!.localizedDescription)))
 			return
@@ -213,7 +215,7 @@ do {
 						let query = "terminate?\(arguments.endpoint)"
 						let token = query.token(key: keyData, nonce: nonce)!
 						let url = URL(string: "\(query)&\(token)", relativeTo: baseURL)!
-						request(url: url) { _ in
+						request(url: url, method: "POST") { _ in
 							done(.finished)
 						}
 					}
