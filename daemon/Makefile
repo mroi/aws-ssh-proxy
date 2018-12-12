@@ -17,8 +17,8 @@ CFLAGS := -O2 -Wall -mmacosx-version-min=10.13 $(CFLAGS)
 all: $(DESTDIR)/SSHProxy.bundle/Contents/_CodeSignature/CodeResources
 
 $(DESTDIR)/SSHProxy.bundle/Contents/_CodeSignature/CodeResources: \
-	$(DESTDIR)/SSHProxy.bundle/Contents/MacOS/ssh-forward \
 	$(DESTDIR)/SSHProxy.bundle/Contents/Info.plist \
+	$(DESTDIR)/SSHProxy.bundle/Contents/MacOS/ssh-forward \
 	$(DESTDIR)/SSHProxy.bundle/Contents/Resources/$(BUNDLE_ID).plist
 	codesign -f --deep -s "$(SIGNING_ID)" -i $(BUNDLE_ID) -o kill,hard,runtime $(DESTDIR)/SSHProxy.bundle
 
@@ -34,7 +34,7 @@ $(DESTDIR)/SSHProxy.bundle/Contents/Resources/$(BUNDLE_ID).plist: launchd.plist 
 
 .build/release/ssh-forward: .build/sandbox.o $(wildcard forward/*.swift)
 	rm -f $@
-	swift build -c release --static-swift-stdlib \
+	swift build --product $(@F) --configuration release --static-swift-stdlib \
 		$(foreach flag,$(SWIFTFLAGS),-Xswiftc $(flag)) -Xlinker $<
 
 .build/sandbox.o: sandbox.c sandbox.h

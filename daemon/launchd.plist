@@ -2,10 +2,10 @@
 <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
 <plist version="1.0">
 <dict>
+	<key>EnablePressuredExit</key>
+	<true/>
 	<key>Label</key>
 	<string>${BUNDLE_ID}</string>
-	<key>UserName</key>
-	<string>${USERNAME}</string>
 	<key>ProgramArguments</key>
 	<array>
 		<string>${DESTDIR}/SSHProxy.bundle/Contents/MacOS/ssh-forward</string>
@@ -16,9 +16,9 @@
 		<string>--url</string>
 		<string>${URL}</string>
 	</array>
-	<key>EnablePressuredExit</key>
-	<true/>
 	<key>StartInterval</key>
 	<integer>300</integer>
+	<key>UserName</key>
+	<string>${USERNAME}</string>
 </dict>
 </plist>
