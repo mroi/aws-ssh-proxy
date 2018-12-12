@@ -3,7 +3,10 @@ import PackageDescription
 
 let package = Package(
 	name: "SSHProxy",
+	products: [
+		.executable(name: "ssh-forward", targets: ["Forward"])
+	],
 	targets: [
-		.target(name: "SSHProxy", path: ".", exclude: ["sandbox.c"])
+		.target(name: "Forward", path: "forward")
 	]
 )

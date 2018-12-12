@@ -8,7 +8,7 @@
 	<string>${USERNAME}</string>
 	<key>ProgramArguments</key>
 	<array>
-		<string>${DESTDIR}/SSHProxy.bundle/Contents/MacOS/SSHProxy</string>
+		<string>${DESTDIR}/SSHProxy.bundle/Contents/MacOS/ssh-forward</string>
 		<string>--endpoint</string>
 		<string>${ENDPOINT}</string>
 		<string>--key</string>

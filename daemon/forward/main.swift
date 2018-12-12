@@ -236,7 +236,7 @@ do {
 }
 catch let error as ArgumentError {
 	print(error)
-	print("Usage: SSHProxy --endpoint <name> --key <secret> --url <url>")
+	print("Usage: ssh-forward --endpoint <name> --key <secret> --url <url>")
 	exit(EX_USAGE)
 }
 catch let error as InternalError {
