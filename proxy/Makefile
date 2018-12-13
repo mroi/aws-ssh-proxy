@@ -12,27 +12,31 @@ SIGNING_ID ?= $(shell id -F)
 SWIFTFLAGS := -target x86_64-apple-macos10.13 -import-objc-header sandbox.h $(SWIFTFLAGS)
 CFLAGS     := -O2 -Wall -mmacosx-version-min=10.13 $(CFLAGS)
 
+TOPLEVEL = \
+	$(DESTDIR)/SSHProxy.bundle/Contents/Info.plist
+BINARIES = \
+	$(DESTDIR)/SSHProxy.bundle/Contents/MacOS/ssh-forward
+RESOURCES = \
+	$(DESTDIR)/SSHProxy.bundle/Contents/Resources/$(BUNDLE_ID).plist
+
 .PHONY: all run log clean cleanall
 
-all: $(DESTDIR)/SSHProxy.bundle/Contents/_CodeSignature/CodeResources
+all: $(TOPLEVEL) $(BINARIES) $(RESOURCES) $(DESTDIR)/SSHProxy.bundle/Contents/_CodeSignature/CodeResources
 
-$(DESTDIR)/SSHProxy.bundle/Contents/_CodeSignature/CodeResources: \
-	$(DESTDIR)/SSHProxy.bundle/Contents/Info.plist \
-	$(DESTDIR)/SSHProxy.bundle/Contents/MacOS/ssh-forward \
-	$(DESTDIR)/SSHProxy.bundle/Contents/Resources/$(BUNDLE_ID).plist
+$(DESTDIR)/SSHProxy.bundle/Contents/_CodeSignature/CodeResources: $(TOPLEVEL) $(BINARIES) $(RESOURCES)
 	codesign -f --deep -s "$(SIGNING_ID)" -i $(BUNDLE_ID) -o kill,hard,runtime $(DESTDIR)/SSHProxy.bundle
 
-$(DESTDIR)/SSHProxy.bundle/Contents/Info.plist: resources/Info.plist
+$(TOPLEVEL): $(DESTDIR)/SSHProxy.bundle/Contents/%: resources/%
 	mkdir -p $(@D) && cp $< $@
 
-$(DESTDIR)/SSHProxy.bundle/Contents/MacOS/ssh-forward: .build/release/ssh-forward
+$(BINARIES): $(DESTDIR)/SSHProxy.bundle/Contents/MacOS/%: .build/release/%
 	mkdir -p $(@D) && cp $< $@
 
 $(DESTDIR)/SSHProxy.bundle/Contents/Resources/$(BUNDLE_ID).plist: resources/launchd.plist resources/Info.plist ../config.php
 	mkdir -p $(@D)
 	eval "`echo "cat << EOF\n$$(<$<)\nEOF"`" > $@
 
-.build/release/ssh-forward: .build/sandbox.o $(wildcard forward/*.swift)
+.build/release/ssh-forward: .build/release/ssh-%: .build/sandbox.o %/main.swift
 	rm -f $@
 	swift build --product $(@F) --configuration release --static-swift-stdlib \
 		$(foreach flag,$(SWIFTFLAGS),-Xswiftc $(flag)) -Xlinker $<
