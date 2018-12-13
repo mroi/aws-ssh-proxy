@@ -1,5 +1,5 @@
 /.aws
 /.user.ini
 /aws.phar
-/daemon/.build
 /config.php
+/proxy/.build

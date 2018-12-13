@@ -82,7 +82,7 @@ queries the status of the EC2 VMs using the PHP service. A running VM signifies 
 request and the daemon will forward its local SSH port to the VM.
 
 1. You install the launch daemon by invoking `make` in the 
-   [`daemon`](https://github.com/mroi/aws-ssh-proxy/blob/master/daemon/) directory. You can 
+   [`proxy`](https://github.com/mroi/aws-ssh-proxy/blob/master/proxy/) directory. You can 
    override variables (`DESTDIR`, `SIGNING_ID`, …) to configure the installation.
 2. Register the daemon with launchd by copying the included plist file from 
    `SSHProxy.bundle/Contents/Resources` to `/Library/LaunchDaemons/`. You may want to 
