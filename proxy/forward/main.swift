@@ -5,6 +5,8 @@ import Dispatch
 import Darwin
 import os.log
 
+import ProxyUtil
+
 sandbox(bundlePath: Bundle.main.bundlePath)
 
 // configure URLSession without permanent storage

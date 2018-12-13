@@ -15,11 +15,12 @@ CFLAGS     := -O2 -Wall -mmacosx-version-min=10.13 $(CFLAGS)
 TOPLEVEL = \
 	$(DESTDIR)/SSHProxy.bundle/Contents/Info.plist
 BINARIES = \
+	$(DESTDIR)/SSHProxy.bundle/Contents/MacOS/ssh-connect \
 	$(DESTDIR)/SSHProxy.bundle/Contents/MacOS/ssh-forward
 RESOURCES = \
 	$(DESTDIR)/SSHProxy.bundle/Contents/Resources/$(BUNDLE_ID).plist
 
-.PHONY: all run log clean cleanall
+.PHONY: all connect forward log clean cleanall
 
 all: $(TOPLEVEL) $(BINARIES) $(RESOURCES) $(DESTDIR)/SSHProxy.bundle/Contents/_CodeSignature/CodeResources
 
@@ -36,7 +37,7 @@ $(DESTDIR)/SSHProxy.bundle/Contents/Resources/$(BUNDLE_ID).plist: resources/laun
 	mkdir -p $(@D)
 	eval "`echo "cat << EOF\n$$(<$<)\nEOF"`" > $@
 
-.build/release/ssh-forward: .build/release/ssh-%: .build/sandbox.o %/main.swift
+.build/release/ssh-connect .build/release/ssh-forward: .build/release/ssh-%: .build/sandbox.o %/main.swift util.swift
 	rm -f $@
 	swift build --product $(@F) --configuration release --static-swift-stdlib \
 		$(foreach flag,$(SWIFTFLAGS),-Xswiftc $(flag)) -Xlinker $<
@@ -44,12 +45,12 @@ $(DESTDIR)/SSHProxy.bundle/Contents/Resources/$(BUNDLE_ID).plist: resources/laun
 .build/sandbox.o: sandbox.c sandbox.h
 	mkdir -p $(@D) && $(CC) $(CFLAGS) $(LDFLAGS) -c -o $@ $<
 
-run: all
-	$(DESTDIR)/SSHProxy.bundle/Contents/MacOS/ssh-forward \
+connect forward: all
+	$(DESTDIR)/SSHProxy.bundle/Contents/MacOS/ssh-$@ \
 		--endpoint $(ENDPOINT) --key $(KEY) --url $(URL)
 
 log:
-	@log stream --predicate '(process == "ssh-forward") or (eventMessage contains "ssh-forward")'
+	@log stream --predicate '(process == "ssh-forward") or (process == "ssh-connect") or (eventMessage contains "ssh-forward") or (eventMessage contains "ssh-connect")'
 
 clean:
 	rm -rf .build

@@ -13,7 +13,7 @@ The system consists of four pieces:
 * some initial setup at Amazon,
 * a web service you need to host on a PHP-enabled web server,
 * a launch daemon for the Macs you want to connect to, and
-* an SSH proxy script for the machine that establishes the connection.
+* an SSH proxy command for the machine that establishes the connection.
 
 Each of these pieces is described below in its own section.
 
@@ -87,6 +87,25 @@ request and the daemon will forward its local SSH port to the VM.
 2. Register the daemon with launchd by copying the included plist file from 
    `SSHProxy.bundle/Contents/Resources` to `/Library/LaunchDaemons/`. You may want to 
    customize the file if the defaults don’t suit your needs.
+
+SSH Proxy Command
+-----------------
+
+Connecting to an endpoint requires launching and later tearing down the respective EC2 VM. 
+This can be automated and integrated into SSH by way of a proxy command. The binary 
+`ssh-connect` is installed alongside the daemon in the `SSHProxy.bundle/Contents/MacOS` 
+directory. You can use it in your SSH configuration by way of the `ProxyCommand` directive. 
+It understands the same command line options as the daemon:
+
+**`--endpoint`**  
+Specifies the name of the endpoint to connect to. Usage of `%h` in you SSH config is 
+practical.
+
+**`--key`**  
+The pre-shared secret to authenticate the connection.
+
+**`--url`**  
+The URL where the PHP web service can be reached.
 
 This work is licensed under the [WTFPL](http://www.wtfpl.net/), so you can do anything you 
 want with it.
