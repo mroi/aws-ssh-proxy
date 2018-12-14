@@ -10,9 +10,9 @@ static const char profile[] =
 	"(deny default)\n"
 	"(debug deny)\n"
 	"(import \"system.sb\")\n"
-	"(define bundle-path (param \"BUNDLE_PATH\"))\n"
 	"(allow file-read-metadata)\n"
-	"(allow file-read* (subpath bundle-path))\n"
+	"(allow file-read* (subpath (param \"BUNDLE_PATH\")))\n"
+	"(allow file-read* (literal (string-append (param \"HOME\") \"/.ssh/ssh_proxy\")))\n"
 	"(allow file-read* (require-all (file-mode #o0004)(require-not (subpath \"/Users\"))))\n"
 	// required access to preferences
 	"(allow user-preference-read (preference-domain \"kCFPreferencesAnyApplication\"))\n"
@@ -33,14 +33,16 @@ static const char profile[] =
 	"(allow network-outbound (remote ip) (subpath \"/private/var/run\"))\n"
 	"(system-network)\n";
 
-void sandbox(const char *bundle_path)
+void sandbox(const char *home, const char *bundle_path)
 {
 	char *error;
-	const char *params[3];
+	const char *params[5];
 
-	params[0] = "BUNDLE_PATH";
-	params[1] = bundle_path;
-	params[2] = NULL;
+	params[0] = "HOME";
+	params[1] = home;
+	params[2] = "BUNDLE_PATH";
+	params[3] = bundle_path;
+	params[4] = NULL;
 
 	if (sandbox_init_with_parameters(profile, 0, params, &error) != 0) {
 		puts(error);

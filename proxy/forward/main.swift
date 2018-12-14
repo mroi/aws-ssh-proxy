@@ -7,7 +7,7 @@ import os.log
 
 import ProxyUtil
 
-sandbox(bundlePath: Bundle.main.bundlePath)
+sandbox()
 
 // configure URLSession without permanent storage
 let config = URLSessionConfiguration.ephemeral
