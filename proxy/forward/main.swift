@@ -27,7 +27,7 @@ do {
 		let token = query.token(key: arguments.key, nonce: nonce)!
 		let url = URL(string: "\(query)&\(token)", relativeTo: arguments.url)!
 
-		// query AWS and check response
+		// query VM status and check response
 		request(url: url) { result in
 			do {
 				switch result {
@@ -42,6 +42,7 @@ do {
 						throw RequestError.unauthorized(proxy)
 					}
 					ssh(mode: .forward, to: proxy.ip) {
+						// terminate proxy VM
 						let query = "terminate?\(arguments.endpoint)"
 						let token = query.token(key: arguments.key, nonce: nonce)!
 						let url = URL(string: "\(query)&\(token)", relativeTo: arguments.url)!
