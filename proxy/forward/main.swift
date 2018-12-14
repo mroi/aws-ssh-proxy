@@ -1,7 +1,4 @@
 import Foundation
-import Security
-import CommonCrypto
-import Dispatch
 import Darwin
 import os.log
 
@@ -9,113 +6,9 @@ import ProxyUtil
 
 sandbox()
 
-// configure URLSession without permanent storage
-let config = URLSessionConfiguration.ephemeral
-config.httpCookieAcceptPolicy = .never
-config.httpShouldSetCookies = false
-config.urlCache = nil
-let session = URLSession(configuration: config)
-
-
-enum InternalError: Error {
-	case noBundleId
-	case noRandom
-}
-
-enum RequestError: Error {
-	case clientError(_: String)
-	case serverError(_: String)
-	case invalidResponse(_: String)
-	case unauthorized(_: (Substring, Substring))
-	case noHTTPResponse
-	case noResponse
-}
-
-enum RequestResult {
-	case nothing
-	case forward(ip: Substring, token: Substring)
-	case error(_: RequestError)
-}
-
-
-func random(bytes: Int) throws -> Data {
-	var data = Data(count: bytes)
-	let result = data.withUnsafeMutableBytes {
-		SecRandomCopyBytes(kSecRandomDefault, bytes, $0)
-	}
-	guard result == errSecSuccess else {
-		throw InternalError.noRandom
-	}
-	return data
-}
-
-extension Data {
-	func hmac(key: Data) -> Data {
-		let keyLength = key.count
-		let dataLength = count
-		let algorithm = CCHmacAlgorithm(kCCHmacAlgSHA256)
-		let digestLength = Int(CC_SHA256_DIGEST_LENGTH)
-		return withUnsafeBytes { (data: UnsafePointer<UInt8>) -> Data in
-			let result = UnsafeMutablePointer<UInt8>.allocate(capacity: digestLength)
-			defer { result.deallocate() }
-			key.withUnsafeBytes { key in
-				CCHmac(algorithm, key, keyLength, data, dataLength, result)
-			}
-			return Data(bytes: result, count: digestLength)
-		}
-	}
-}
-
-extension StringProtocol where Index == String.Index {
-	func token(key: Data, nonce: Data) -> String? {
-		guard let data = data(using: .ascii) else { return nil }
-		let hmac = (nonce + data).hmac(key: key)
-		return (nonce + hmac).base64EncodedString()
-	}
-}
-
-func request(url: URL, method: String = "GET", _ done: @escaping (RequestResult) -> Void) -> Void {
-	var request = URLRequest(url: url)
-	request.httpMethod = method
-	let task = session.dataTask(with: request) { data, response, error in
-		guard error == nil else {
-			done(.error(.clientError(error!.localizedDescription)))
-			return
-		}
-		guard let httpResponse = response as? HTTPURLResponse else {
-			done(.error(.noHTTPResponse))
-			return
-		}
-		guard (200...299).contains(httpResponse.statusCode) else {
-			done(.error(.serverError(String(httpResponse.statusCode))))
-			return
-		}
-		guard let data = data, let response = String(data: data, encoding: .utf8) else {
-			done(.error(.noResponse))
-			return
-		}
-
-		let trimmed = response.trimmingCharacters(in: .newlines)
-		let pieces = trimmed.split(separator: " ", maxSplits: 1)
-		switch pieces.count {
-		case 0:
-			done(.nothing)
-		case 2:
-			done(.forward(ip: pieces[0], token: pieces[1]))
-		default:
-			done(.error(.invalidResponse(response)))
-		}
-	}
-	task.countOfBytesClientExpectsToReceive = 1024
-	task.resume()
-}
-
 func forwardSSH(ip: Substring, _ done: @escaping () -> Void) {
 	done()
 }
-
-
-// MARK: - main code
 
 do {
 	let arguments = try parseArguments()
@@ -145,14 +38,14 @@ do {
 				case .nothing:
 					break
 
-				case .forward(let forward):
-					guard let token = forward.ip.token(key: arguments.key, nonce: nonce) else {
-						throw RequestError.invalidResponse(String(forward.ip))
+				case .proxy(let proxy):
+					guard let token = proxy.ip.token(key: arguments.key, nonce: nonce) else {
+						throw RequestError.invalidResponse(String(proxy.ip))
 					}
-					guard token == forward.token else {
-						throw RequestError.unauthorized(forward)
+					guard token == proxy.token else {
+						throw RequestError.unauthorized(proxy)
 					}
-					forwardSSH(ip: forward.ip) {
+					forwardSSH(ip: proxy.ip) {
 						let query = "terminate?\(arguments.endpoint)"
 						let token = query.token(key: arguments.key, nonce: nonce)!
 						let url = URL(string: "\(query)&\(token)", relativeTo: arguments.url)!
