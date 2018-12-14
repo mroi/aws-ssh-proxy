@@ -17,12 +17,6 @@ config.urlCache = nil
 let session = URLSession(configuration: config)
 
 
-enum ArgumentError: Error {
-	case unknown(_: String)
-	case missing(_: String)
-	case invalid(_: String)
-}
-
 enum InternalError: Error {
 	case noBundleId
 	case noRandom
@@ -43,50 +37,6 @@ enum RequestResult {
 	case error(_: RequestError)
 }
 
-
-func parseArguments() throws -> (endpoint: String, key: String, url: String) {
-	let arguments = CommandLine.arguments.dropFirst()
-	var iterator = arguments.makeIterator()
-
-	var endpointArgument: String?
-	var keyArgument: String?
-	var urlArgument: String?
-
-	while let argument = iterator.next() {
-		switch argument {
-		case "--endpoint":
-			endpointArgument = iterator.next()
-		case "--key":
-			keyArgument = iterator.next()
-		case "--url":
-			urlArgument = iterator.next()
-		default:
-			throw ArgumentError.unknown(argument)
-		}
-	}
-
-	let endpointArgumentSanitized = endpointArgument?.unicodeScalars.filter {
-		CharacterSet.alphanumerics.contains($0)
-	}
-	if let sanitized = endpointArgumentSanitized {
-		endpointArgument = String(sanitized)
-	}
-	while urlArgument?.hasSuffix("/") ?? false {
-		urlArgument = String(urlArgument!.dropLast())
-	}
-
-	guard let endpoint = endpointArgument else {
-		throw ArgumentError.missing("--endpoint")
-	}
-	guard let key = keyArgument else {
-		throw ArgumentError.missing("--key")
-	}
-	guard let url = urlArgument else {
-		throw ArgumentError.missing("--url")
-	}
-
-	return (endpoint, key, url)
-}
 
 func random(bytes: Int) throws -> Data {
 	var data = Data(count: bytes)
@@ -170,17 +120,6 @@ func forwardSSH(ip: Substring, _ done: @escaping () -> Void) {
 do {
 	let arguments = try parseArguments()
 
-	// prepare static data
-	guard let _ = arguments.endpoint.data(using: .ascii) else {
-		throw ArgumentError.invalid(arguments.endpoint)
-	}
-	guard let keyData = arguments.key.data(using: .utf8) else {
-		throw ArgumentError.invalid(arguments.key)
-	}
-	guard let baseURL = URL(string: arguments.url) else {
-		throw ArgumentError.invalid(arguments.url)
-	}
-
 	// schedule background activity
 	guard let bundleId = Bundle.main.bundleIdentifier else {
 		throw InternalError.noBundleId
@@ -196,8 +135,8 @@ do {
 			exit(EX_SOFTWARE)
 		}
 		let query = "status?\(arguments.endpoint)"
-		let token = query.token(key: keyData, nonce: nonce)!
-		let url = URL(string: "\(query)&\(token)", relativeTo: baseURL)!
+		let token = query.token(key: arguments.key, nonce: nonce)!
+		let url = URL(string: "\(query)&\(token)", relativeTo: arguments.url)!
 
 		// query AWS and check response
 		request(url: url) { result in
@@ -207,7 +146,7 @@ do {
 					break
 
 				case .forward(let forward):
-					guard let token = forward.ip.token(key: keyData, nonce: nonce) else {
+					guard let token = forward.ip.token(key: arguments.key, nonce: nonce) else {
 						throw RequestError.invalidResponse(String(forward.ip))
 					}
 					guard token == forward.token else {
@@ -215,8 +154,8 @@ do {
 					}
 					forwardSSH(ip: forward.ip) {
 						let query = "terminate?\(arguments.endpoint)"
-						let token = query.token(key: keyData, nonce: nonce)!
-						let url = URL(string: "\(query)&\(token)", relativeTo: baseURL)!
+						let token = query.token(key: arguments.key, nonce: nonce)!
+						let url = URL(string: "\(query)&\(token)", relativeTo: arguments.url)!
 						request(url: url, method: "POST") { _ in
 							done(.finished)
 						}
