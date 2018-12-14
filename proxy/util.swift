@@ -32,6 +32,11 @@ public enum RequestResult {
 	case error(_: RequestError)
 }
 
+public enum ProxyMode {
+	case connect
+	case forward
+}
+
 public func parseArguments() throws -> (endpoint: String, key: Data, url: URL) {
 	let arguments = CommandLine.arguments.dropFirst()
 	var iterator = arguments.makeIterator()
@@ -129,7 +134,7 @@ public func request(url: URL, method: String = "GET", _ done: @escaping (Request
 
 	var request = URLRequest(url: url)
 	request.httpMethod = method
-	
+
 	let task = URLSessionStore.session.dataTask(with: request) { data, response, error in
 		guard error == nil else {
 			done(.error(.clientError(error!.localizedDescription)))
@@ -161,4 +166,8 @@ public func request(url: URL, method: String = "GET", _ done: @escaping (Request
 	}
 	task.countOfBytesClientExpectsToReceive = 1024
 	task.resume()
+}
+
+public func ssh(mode: ProxyMode, to ip: Substring, _ done: @escaping () -> Void) {
+	done()
 }

@@ -6,10 +6,6 @@ import ProxyUtil
 
 sandbox()
 
-func forwardSSH(ip: Substring, _ done: @escaping () -> Void) {
-	done()
-}
-
 do {
 	let arguments = try parseArguments()
 
@@ -45,7 +41,7 @@ do {
 					guard token == proxy.token else {
 						throw RequestError.unauthorized(proxy)
 					}
-					forwardSSH(ip: proxy.ip) {
+					ssh(mode: .forward, to: proxy.ip) {
 						let query = "terminate?\(arguments.endpoint)"
 						let token = query.token(key: arguments.key, nonce: nonce)!
 						let url = URL(string: "\(query)&\(token)", relativeTo: arguments.url)!
