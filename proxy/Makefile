@@ -54,7 +54,7 @@ connect forward: all
 		--endpoint $(ENDPOINT) --key $(KEY) --url $(URL)
 
 log:
-	@log stream --predicate '(process == "ssh-forward") or (process == "ssh-connect") or (eventMessage contains "ssh-forward") or (eventMessage contains "ssh-connect")'
+	@log stream --predicate '(process BEGINSWITH "ssh") OR (eventMessage CONTAINS "ssh")'
 
 clean:
 	rm -rf .build
