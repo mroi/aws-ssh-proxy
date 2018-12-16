@@ -41,7 +41,7 @@ do {
 					guard token == proxy.token else {
 						throw RequestError.unauthorized(proxy)
 					}
-					ssh(mode: .forward, to: proxy.ip) {
+					try ssh(mode: .forward, to: proxy.ip) {
 						// terminate proxy VM
 						let query = "terminate?\(arguments.endpoint)"
 						let token = query.token(key: arguments.key, nonce: nonce)!

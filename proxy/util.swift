@@ -15,6 +15,7 @@ public enum ArgumentError: Error {
 public enum InternalError: Error {
 	case noBundleId
 	case noRandom
+	case noSSHConfig
 }
 
 public enum RequestError: Error {
@@ -32,9 +33,9 @@ public enum RequestResult {
 	case error(_: RequestError)
 }
 
-public enum ProxyMode {
-	case connect
-	case forward
+public enum ProxyMode: String {
+	case connect = "SSH_PROXY_CONNECT"
+	case forward = "SSH_PROXY_FORWARD"
 }
 
 public func parseArguments() throws -> (endpoint: String, key: Data, url: URL) {
@@ -168,6 +169,15 @@ public func request(url: URL, method: String = "GET", _ done: @escaping (Request
 	task.resume()
 }
 
-public func ssh(mode: ProxyMode, to ip: Substring, _ done: @escaping () -> Void) {
-	done()
+public func ssh(mode: ProxyMode, to ip: Substring, _ done: @escaping () -> Void) throws {
+	guard let config = Bundle.main.path(forResource: "ssh_config", ofType: nil) else {
+		throw InternalError.noSSHConfig
+	}
+
+	let ssh = Process()
+	ssh.executableURL = URL(fileURLWithPath: "/usr/bin/ssh")
+	ssh.arguments = ["-F", config, String(ip)]
+	ssh.environment = [mode.rawValue: "1"]
+	ssh.terminationHandler = { _ in done() }
+	try ssh.run()
 }
