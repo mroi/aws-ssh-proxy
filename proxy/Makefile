@@ -18,6 +18,7 @@ BINARIES = \
 	$(DESTDIR)/SSHProxy.bundle/Contents/MacOS/ssh-connect \
 	$(DESTDIR)/SSHProxy.bundle/Contents/MacOS/ssh-forward
 RESOURCES = \
+	$(DESTDIR)/SSHProxy.bundle/Contents/Resources/ssh_config \
 	$(DESTDIR)/SSHProxy.bundle/Contents/Resources/$(BUNDLE_ID).plist
 
 .PHONY: all connect forward log clean cleanall
@@ -32,6 +33,9 @@ $(TOPLEVEL): $(DESTDIR)/SSHProxy.bundle/Contents/%: resources/%
 
 $(BINARIES): $(DESTDIR)/SSHProxy.bundle/Contents/MacOS/%: .build/release/%
 	mkdir -p $(@D) && cp -p $< $@ && chmod 755 $@
+
+$(DESTDIR)/SSHProxy.bundle/Contents/Resources/%: resources/%
+	mkdir -p $(@D) && cp -p $< $@ && chmod 644 $@
 
 $(DESTDIR)/SSHProxy.bundle/Contents/Resources/$(BUNDLE_ID).plist: resources/launchd.plist resources/Info.plist ../config.php
 	mkdir -p $(@D)
