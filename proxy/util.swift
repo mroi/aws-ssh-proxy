@@ -3,6 +3,7 @@ import Security
 import CommonCrypto
 
 public func sandbox() -> Void {
+	FileManager.default.changeCurrentDirectoryPath(Bundle.main.bundlePath)
 	sandbox(home: NSHomeDirectory(), bundlePath: Bundle.main.bundlePath)
 }
 

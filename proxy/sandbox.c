@@ -12,7 +12,9 @@ static const char profile[] =
 	"(import \"system.sb\")\n"
 	"(allow file-read-metadata)\n"
 	"(allow file-read* (subpath (param \"BUNDLE_PATH\")))\n"
+	"(allow file-read* (literal (string-append (param \"HOME\") \"/.CFUserTextEncoding\")))\n"
 	"(allow file-read* (literal (string-append (param \"HOME\") \"/.ssh/ssh_proxy\")))\n"
+	"(allow file-read* (literal (string-append (param \"HOME\") \"/.ssh/ssh_proxy.pub\")))\n"
 	"(allow file-read* (require-all (file-mode #o0004)(require-not (subpath \"/Users\"))))\n"
 	// required access to preferences
 	"(allow user-preference-read (preference-domain \"kCFPreferencesAnyApplication\"))\n"
@@ -29,6 +31,11 @@ static const char profile[] =
 	"(allow mach-lookup (global-name \"com.apple.lsd.mapdb\"))\n"
 	// system notification bus
 	"(allow mach-lookup (global-name-regex #\"^com\\.apple\\.distributed_notifications\"))\n"
+	// ssh sub-process
+	"(allow mach-lookup (global-name \"com.apple.coreservices.quarantine-resolver\"))\n"
+	"(allow process-fork)\n"
+	"(allow process-exec)\n"
+	"(allow file-write-data (literal \"/dev/tty\"))\n"
 	// networking and related daemon sockets (like mDNSResponder)
 	"(allow network-outbound (remote ip) (subpath \"/private/var/run\"))\n"
 	"(system-network)\n";
