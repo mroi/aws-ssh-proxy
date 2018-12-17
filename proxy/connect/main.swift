@@ -1,4 +1,5 @@
 import Foundation
+import Dispatch
 import Darwin
 
 import ProxyUtil
@@ -43,7 +44,9 @@ do {
 				print(error)
 			}
 			// retry until success
-			performRequest()
+			DispatchQueue.main.asyncAfter(deadline: .now() + 5) {
+				performRequest()
+			}
 		}
 	}
 	performRequest()
