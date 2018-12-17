@@ -11,7 +11,6 @@ IdentityFile ~/.ssh/ssh_proxy
 LogLevel QUIET
 PreferredAuthentications publickey
 PubkeyAuthentication yes
-RequestTTY force
 ServerAliveCountMax 3
 ServerAliveInterval 10
 StrictHostKeyChecking no
@@ -25,8 +24,9 @@ VerifyHostKeyDNS no
 Match exec "printenv SSH_PROXY_FORWARD"
 RemoteCommand trap 'sudo poweroff --force' ERR EXIT HUP INT QUIT TERM ; sleep 86400
 RemoteForward /home/ec2-user/ssh-server localhost:ssh
+RequestTTY force
 
 # clients connect the server socket to stdin/stdout to act as an SSH ProxyCommand
 # marker files facilitate the last client to terminate the VM five minutes after disconnect
 Match exec "printenv SSH_PROXY_CONNECT"
-RemoteCommand trap 'rm -f ssh-client-$PPID ; sleep 300 ; test -z "`ls ssh-client-* 2> /dev/null`" && sudo poweroff --force' ERR EXIT HUP INT QUIT TERM ; touch ssh-client-$PPID ; sudo yum -y install socat &> /dev/null ; while ! test -e /home/ec2-user/ssh-server ; do sleep 5 ; done ; socat - UNIX-CONNECT:/home/ec2-user/ssh-server
+RemoteCommand trap 'rm -f ssh-client-$PPID ; sleep 300 ; test -z "`ls ssh-client* 2> /dev/null`" && sudo poweroff --force' ERR EXIT HUP INT QUIT TERM ; touch ssh-client-$PPID ; sudo yum -y install socat &> /dev/null ; while ! test -e /home/ec2-user/ssh-server ; do sleep 5 ; done ; socat stdio unix-connect:/home/ec2-user/ssh-server

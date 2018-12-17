@@ -108,5 +108,16 @@ The pre-shared secret to authenticate the connection.
 **`--url`**  
 The URL where the PHP web service can be reached.
 
+A useful SSH config file, which establishes a local connection when possible and connects 
+via proxy when necessary looks like this:
+
+```
+Match host <hostnames> exec "route get %h.local"
+HostName %h.local
+
+Match host <hostnames>
+ProxyCommand /path/to/SSHProxy.bundle/Contents/MacOS/ssh-connect --endpoint %h --key <secret> --url <url>
+```
+
 This work is licensed under the [WTFPL](http://www.wtfpl.net/), so you can do anything you 
 want with it.
