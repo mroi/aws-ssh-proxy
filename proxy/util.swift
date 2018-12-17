@@ -170,7 +170,7 @@ public func request(url: URL, method: String = "GET", _ done: @escaping (Request
 	task.resume()
 }
 
-public func ssh(mode: ProxyMode, to ip: Substring, _ done: @escaping () -> Void) throws {
+public func ssh(mode: ProxyMode, to ip: Substring, _ done: @escaping (Process) -> Void) throws {
 	guard let config = Bundle.main.path(forResource: "ssh_config", ofType: nil) else {
 		throw InternalError.noSSHConfig
 	}
@@ -179,6 +179,6 @@ public func ssh(mode: ProxyMode, to ip: Substring, _ done: @escaping () -> Void)
 	ssh.executableURL = URL(fileURLWithPath: "/usr/bin/ssh")
 	ssh.arguments = ["-F", config, String(ip)]
 	ssh.environment = [mode.rawValue: "1"]
-	ssh.terminationHandler = { _ in done() }
+	ssh.terminationHandler = done
 	try ssh.run()
 }

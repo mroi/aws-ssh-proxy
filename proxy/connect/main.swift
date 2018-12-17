@@ -31,8 +31,8 @@ do {
 					guard token == proxy.token else {
 						throw RequestError.unauthorized(proxy)
 					}
-					try ssh(mode: .connect, to: proxy.ip) {
-						exit(EX_OK)
+					try ssh(mode: .connect, to: proxy.ip) { ssh in
+						exit(ssh.terminationStatus)
 					}
 					return
 
