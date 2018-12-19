@@ -29,13 +29,13 @@ $(DESTDIR)/SSHProxy.bundle/Contents/_CodeSignature/CodeResources: $(TOPLEVEL) $(
 	codesign -f --deep -s "$(SIGNING_ID)" -i $(BUNDLE_ID) -o kill,hard,runtime $(DESTDIR)/SSHProxy.bundle
 
 $(TOPLEVEL): $(DESTDIR)/SSHProxy.bundle/Contents/%: resources/%
-	mkdir -p $(@D) && cp -p $< $@ && chmod 644 $@
+	mkdir -p $(@D) && cp $< $@ && chmod 644 $@
 
 $(BINARIES): $(DESTDIR)/SSHProxy.bundle/Contents/MacOS/%: .build/release/%
-	mkdir -p $(@D) && cp -p $< $@ && chmod 755 $@
+	mkdir -p $(@D) && cp $< $@ && chmod 755 $@
 
 $(DESTDIR)/SSHProxy.bundle/Contents/Resources/%: resources/%
-	mkdir -p $(@D) && cp -p $< $@ && chmod 644 $@
+	mkdir -p $(@D) && cp $< $@ && chmod 644 $@
 
 $(DESTDIR)/SSHProxy.bundle/Contents/Resources/$(BUNDLE_ID).plist: resources/launchd.plist resources/Info.plist ../config.php
 	mkdir -p $(@D)
