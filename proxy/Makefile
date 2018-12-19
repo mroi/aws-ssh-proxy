@@ -21,7 +21,7 @@ RESOURCES = \
 	$(DESTDIR)/SSHProxy.bundle/Contents/Resources/ssh_config \
 	$(DESTDIR)/SSHProxy.bundle/Contents/Resources/$(BUNDLE_ID).plist
 
-.PHONY: all connect forward log clean cleanall
+.PHONY: all connect forward log xcode clean cleanall
 
 all: $(TOPLEVEL) $(BINARIES) $(RESOURCES) $(DESTDIR)/SSHProxy.bundle/Contents/_CodeSignature/CodeResources
 
@@ -56,8 +56,12 @@ connect forward: all
 log:
 	@log stream --predicate '(process BEGINSWITH "ssh") OR (eventMessage CONTAINS "ssh")'
 
+xcode:
+	swift package generate-xcodeproj
+	open SSHProxy.xcodeproj
+
 clean:
-	rm -rf .build
+	rm -rf .build SSHProxy.xcodeproj
 
 cleanall: clean
 	rm -rf $(DESTDIR)/SSHProxy.bundle

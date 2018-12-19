@@ -3,3 +3,4 @@
 /aws.phar
 /config.php
 /proxy/.build
+/proxy/SSHProxy.xcodeproj
