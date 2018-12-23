@@ -25,7 +25,7 @@ steps. You will find everything you need for this setup in the
 [`aws`](https://github.com/mroi/aws-ssh-proxy/blob/master/aws/) directory.
 
 1. Create an SSH key pair and upload the public key to EC2 with the name `ssh-proxy`. Store 
-   the private key in a file `ssh_proxy` in your `~/.ssh` directory.
+   the keys in a files `proxy` and `proxy.pub` in your `~/.ssh` directory.
 2. Create an IAM user (recommended name is `ssh-proxy`) and keep its credentials.
 3. Create an EC2 security group from 
    [`security-group.json`](https://github.com/mroi/aws-ssh-proxy/blob/master/aws/security-group.json) 

@@ -13,8 +13,8 @@ static const char profile[] =
 	"(allow file-read-metadata)\n"
 	"(allow file-read* (subpath (param \"BUNDLE_PATH\")))\n"
 	"(allow file-read* (literal (string-append (param \"HOME\") \"/.CFUserTextEncoding\")))\n"
-	"(allow file-read* (literal (string-append (param \"HOME\") \"/.ssh/ssh_proxy\")))\n"
-	"(allow file-read* (literal (string-append (param \"HOME\") \"/.ssh/ssh_proxy.pub\")))\n"
+	"(allow file-read* (literal (string-append (param \"HOME\") \"/.ssh/proxy\")))\n"
+	"(allow file-read* (literal (string-append (param \"HOME\") \"/.ssh/proxy.pub\")))\n"
 	"(allow file-read* (require-all (file-mode #o0004)(require-not (subpath \"/Users\"))))\n"
 	// required access to preferences
 	"(allow user-preference-read (preference-domain \"kCFPreferencesAnyApplication\"))\n"

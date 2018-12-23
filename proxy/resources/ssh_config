@@ -7,7 +7,7 @@ ForwardAgent no
 ForwardX11 no
 IdentitiesOnly yes
 IdentityAgent none
-IdentityFile ~/.ssh/ssh_proxy
+IdentityFile ~/.ssh/proxy
 LogLevel QUIET
 PreferredAuthentications publickey
 PubkeyAuthentication yes
