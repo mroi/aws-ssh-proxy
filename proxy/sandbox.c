@@ -35,6 +35,7 @@ static const char profile[] =
 	"(allow mach-lookup (global-name \"com.apple.coreservices.quarantine-resolver\"))\n"
 	"(allow process-fork)\n"
 	"(allow process-exec)\n"
+	"(allow signal (target children))\n"
 	"(allow file-write-data (literal \"/dev/tty\"))\n"
 	// networking and related daemon sockets (like mDNSResponder)
 	"(allow network-outbound (remote ip) (subpath \"/private/var/run\"))\n"

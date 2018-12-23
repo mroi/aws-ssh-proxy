@@ -171,11 +171,31 @@ public func request(url: URL, method: String = "GET", _ done: @escaping (Request
 }
 
 public func ssh(mode: ProxyMode, to ip: Substring, _ done: @escaping (Process) -> Void) throws {
+	struct SignalHandler {
+		static private var didSetHandler = false
+		static var subprocess: Process? {
+			didSet {
+				if !didSetHandler {
+					func handler(signal: Int32) -> Void {
+						SignalHandler.subprocess?.terminate()
+						exit(signal)
+					}
+					signal(SIGHUP, handler)
+					signal(SIGINT, handler)
+					signal(SIGPIPE, handler)
+					signal(SIGTERM, handler)
+					didSetHandler = true
+				}
+			}
+		}
+	}
+
 	guard let config = Bundle.main.path(forResource: "ssh_config", ofType: nil) else {
 		throw InternalError.noSSHConfig
 	}
 
 	let ssh = Process()
+	SignalHandler.subprocess = ssh
 	ssh.executableURL = URL(fileURLWithPath: "/usr/bin/ssh")
 	ssh.arguments = ["-F", config, String(ip)]
 	ssh.environment = [mode.rawValue: "1"]
