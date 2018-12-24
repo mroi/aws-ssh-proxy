@@ -129,6 +129,7 @@ public func request(url: URL, method: String = "GET", _ done: @escaping (Request
 			config.httpCookieAcceptPolicy = .never
 			config.httpShouldSetCookies = false
 			config.urlCache = nil
+			config.waitsForConnectivity = true
 			return config
 		}
 		static let session = URLSession(configuration: config)
