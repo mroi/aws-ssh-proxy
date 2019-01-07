@@ -37,8 +37,8 @@ steps. You will find everything you need for this setup in the
    Replace the security group and subnet IDs with the ones created above.
 6. Finally, configure 
    [`iam-policy.json`](https://github.com/mroi/aws-ssh-proxy/blob/master/aws/iam-policy.json) 
-   as the IAM user’s inline permission policy. Replace the launch template ID with the one 
-   you created above.
+   as the IAM user’s inline permission policy. Replace the account number with your AWS 
+   account ID and the launch template ID with the one you created above.
 
 PHP Web Service
 ---------------

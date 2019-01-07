@@ -17,7 +17,7 @@
 			"Resource": "*",
 			"Condition": {
 				"StringEquals": {
-					"ec2:LaunchTemplate": "arn:aws:ec2:eu-central-1:724339084074:launch-template/lt-<ID>"
+					"ec2:LaunchTemplate": "arn:aws:ec2:eu-central-1:<account>:launch-template/lt-<ID>"
 				},
 				"Bool": {
 					"ec2:IsLaunchTemplateResource": "true"
