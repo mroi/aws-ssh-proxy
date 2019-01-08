@@ -14,6 +14,9 @@
 				}
 			}
 		],
+		"CreditSpecification": {
+			"CpuCredits": "standard"
+		},
 		"Monitoring": {
 			"Enabled": false
 		},
@@ -32,15 +35,6 @@
 		"TagSpecifications": [
 			{
 				"ResourceType": "instance",
-				"Tags": [
-					{
-						"Value": "<undefined>",
-						"Key": "ssh-proxy"
-					}
-				]
-			},
-			{
-				"ResourceType": "volume",
 				"Tags": [
 					{
 						"Value": "<undefined>",
