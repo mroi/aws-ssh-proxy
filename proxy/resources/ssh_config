@@ -1,7 +1,7 @@
 AddKeysToAgent no
 BatchMode yes
 CheckHostIP no
-ConnectionAttempts 5
+ConnectionAttempts 30
 ExitOnForwardFailure yes
 ForwardAgent no
 ForwardX11 no
