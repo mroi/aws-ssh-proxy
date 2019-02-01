@@ -124,15 +124,14 @@ extension StringProtocol where Index == String.Index {
 
 public func request(url: URL, method: String = "GET", _ done: @escaping (RequestResult) -> Void) -> Void {
 	struct URLSessionStore {
-		static private var config: URLSessionConfiguration {
+		static let session: URLSession = {
 			let config = URLSessionConfiguration.ephemeral
 			config.httpCookieAcceptPolicy = .never
 			config.httpShouldSetCookies = false
 			config.urlCache = nil
 			config.waitsForConnectivity = true
-			return config
-		}
-		static let session = URLSession(configuration: config)
+			return URLSession(configuration: config)
+		}()
 	}
 
 	var request = URLRequest(url: url)
