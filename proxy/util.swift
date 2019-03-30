@@ -91,7 +91,7 @@ public func parseArguments() throws -> (endpoint: String, key: Data, url: URL) {
 public func random(bytes: Int) throws -> Data {
 	var data = Data(count: bytes)
 	let result = data.withUnsafeMutableBytes {
-		SecRandomCopyBytes(kSecRandomDefault, bytes, $0)
+		SecRandomCopyBytes(kSecRandomDefault, $0.count, $0.baseAddress!)
 	}
 	guard result == errSecSuccess else {
 		throw InternalError.noRandom
@@ -101,15 +101,13 @@ public func random(bytes: Int) throws -> Data {
 
 extension Data {
 	public func hmac(key: Data) -> Data {
-		let keyLength = key.count
-		let dataLength = count
 		let algorithm = CCHmacAlgorithm(kCCHmacAlgSHA256)
 		let digestLength = Int(CC_SHA256_DIGEST_LENGTH)
-		return withUnsafeBytes { (data: UnsafePointer<UInt8>) -> Data in
+		return withUnsafeBytes { data in
 			let result = UnsafeMutablePointer<UInt8>.allocate(capacity: digestLength)
 			defer { result.deallocate() }
 			key.withUnsafeBytes { key in
-				CCHmac(algorithm, key, keyLength, data, dataLength, result)
+				CCHmac(algorithm, key.baseAddress!, key.count, data.baseAddress!, data.count, result)
 			}
 			return Data(bytes: result, count: digestLength)
 		}
