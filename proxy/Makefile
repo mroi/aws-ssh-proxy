@@ -1,14 +1,13 @@
-BUNDLE_ID = $(shell PlistBuddy -c 'Print CFBundleIdentifier' resources/Info.plist)
-DESTDIR  ?= /Users/Shared/Library/CoreServices
-ENDPOINT ?= $(shell scutil --get LocalHostName)
-KEY      ?= $(shell php -r 'include "../config.php"; echo $$secret;')
-URL      ?= $(shell php -r 'include "../config.php"; echo $$url;')
-USERNAME ?= $(shell id -nu)
+BUNDLE_ID   = $(shell PlistBuddy -c 'Print CFBundleIdentifier' resources/Info.plist)
+DESTDIR    ?= /Users/Shared/Library/CoreServices
+ENDPOINT   ?= $(shell scutil --get LocalHostName)
+KEY        ?= $(shell php -r 'include "../config.php"; echo $$secret;')
+SIGNING_ID ?= $(shell id -F)
+URL        ?= $(shell php -r 'include "../config.php"; echo $$url;')
+USERNAME   ?= $(shell id -nu)
 
 # used to fill in launchd.plist
 export BUNDLE_ID DESTDIR ENDPOINT KEY URL USERNAME
-
-SIGNING_ID ?= $(shell id -F)
 
 TOPLEVEL = \
 	$(DESTDIR)/SSHProxy.bundle/Contents/Info.plist
