@@ -2,6 +2,8 @@ import Foundation
 import Security
 import CommonCrypto
 
+import ProxySandbox
+
 public func sandbox() -> Void {
 	FileManager.default.changeCurrentDirectoryPath(Bundle.main.bundlePath)
 	sandbox(home: NSHomeDirectory(), bundlePath: Bundle.main.bundlePath)

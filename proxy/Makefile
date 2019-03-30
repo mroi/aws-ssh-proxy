@@ -9,8 +9,6 @@ USERNAME ?= $(shell id -nu)
 export BUNDLE_ID DESTDIR ENDPOINT KEY URL USERNAME
 
 SIGNING_ID ?= $(shell id -F)
-SWIFTFLAGS := -target x86_64-apple-macos10.13 -import-objc-header sandbox.h $(SWIFTFLAGS)
-CFLAGS     := -O2 -Wall -mmacosx-version-min=10.13 $(CFLAGS)
 
 TOPLEVEL = \
 	$(DESTDIR)/SSHProxy.bundle/Contents/Info.plist
@@ -41,13 +39,9 @@ $(DESTDIR)/SSHProxy.bundle/Contents/Resources/$(BUNDLE_ID).plist: resources/laun
 	mkdir -p $(@D)
 	eval "`echo "cat << EOF\n$$(<$<)\nEOF"`" > $@
 
-.build/release/ssh-connect .build/release/ssh-forward: .build/release/ssh-%: .build/sandbox.o %/main.swift util.swift
+.build/release/ssh-connect .build/release/ssh-forward: .build/release/ssh-%: %/main.swift $(wildcard *.c *.h *.swift)
 	rm -f $@
-	swift build --product $(@F) --configuration release --static-swift-stdlib \
-		$(foreach flag,$(SWIFTFLAGS),-Xswiftc $(flag)) -Xlinker $<
-
-.build/sandbox.o: sandbox.c sandbox.h
-	mkdir -p $(@D) && $(CC) $(CFLAGS) $(LDFLAGS) -c -o $@ $<
+	swift build --product $(@F) --configuration release
 
 connect forward: all
 	$(DESTDIR)/SSHProxy.bundle/Contents/MacOS/ssh-$@ \
