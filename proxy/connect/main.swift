@@ -1,7 +1,5 @@
 import Foundation
 import Dispatch
-import Darwin
-
 import ProxyUtil
 
 sandbox()

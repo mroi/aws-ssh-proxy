@@ -1,8 +1,9 @@
 import Foundation
-import Darwin
-import os.log
-
 import ProxyUtil
+
+#if os(macOS)
+import os.log
+#endif
 
 sandbox()
 
@@ -10,7 +11,7 @@ do {
 	let arguments = try parseArguments()
 
 	// schedule background activity
-	guard let bundleId = Bundle.main.bundleIdentifier else {
+	guard let bundleId = ProxyBundle.bundleIdentifier else {
 		throw InternalError.noBundleId
 	}
 	let activity = NSBackgroundActivityScheduler(identifier: bundleId)
@@ -57,7 +58,11 @@ do {
 				}
 			}
 			catch {
+			  #if os(macOS)
 				os_log("%{public}s", type: .error, String(reflecting: error))
+			  #elseif os(Linux)
+				print(String(reflecting: error))
+			  #endif
 			}
 			done(.finished)
 		}

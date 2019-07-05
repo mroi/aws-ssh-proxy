@@ -43,6 +43,7 @@ static const char profile[] =
 
 void sandbox(const char *home, const char *bundle_path)
 {
+#ifdef __APPLE__
 	char *error;
 	const char *params[5];
 
@@ -56,4 +57,9 @@ void sandbox(const char *home, const char *bundle_path)
 		puts(error);
 		exit(EX_OSERR);
 	}
+
+#elif __linux__
+	(void)home;
+	(void)bundle_path;
+#endif
 }

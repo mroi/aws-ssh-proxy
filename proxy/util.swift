@@ -1,12 +1,29 @@
 import Foundation
-import Security
-import CommonCrypto
-
 import ProxySandbox
 
+
+// Mark: - Types and Initialization
+
 public func sandbox() -> Void {
-	FileManager.default.changeCurrentDirectoryPath(Bundle.main.bundlePath)
-	sandbox(home: NSHomeDirectory(), bundlePath: Bundle.main.bundlePath)
+	FileManager.default.changeCurrentDirectoryPath(ProxyBundle.bundlePath)
+	sandbox(home: NSHomeDirectory(), bundlePath: ProxyBundle.bundlePath)
+}
+
+public struct ProxyBundle {
+  #if os(macOS)
+	public static var bundleIdentifier: String? { return Bundle.main.bundleIdentifier }
+	public static var bundlePath: String { return Bundle.main.bundlePath }
+	public static func path(forResource name: String?, ofType type: String?) -> String? {
+		return Bundle.main.path(forResource: name, ofType: type)
+	}
+  #elseif os(Linux)
+	// FIXME
+	public static var bundleIdentifier: String? { return "" }
+	public static var bundlePath: String { return "." }
+	public static func path(forResource name: String?, ofType type: String?) -> String? {
+		return ""
+	}
+  #endif
 }
 
 public enum ArgumentError: Error {
@@ -88,6 +105,14 @@ public func parseArguments() throws -> (endpoint: String, key: Data, url: URL) {
 	return (endpoint, keyData, url)
 }
 
+
+// MARK: - Cryptography
+
+#if os(macOS)
+
+import Security
+import CommonCrypto
+
 public func random(bytes: Int) throws -> Data {
 	var data = Data(count: bytes)
 	let result = data.withUnsafeMutableBytes {
@@ -114,6 +139,21 @@ extension Data {
 	}
 }
 
+#elseif os(Linux)
+
+// FIXME: implement random and HMac on Linux
+public func random(bytes: Int) throws -> Data {
+	return Data(count: bytes)
+}
+
+extension Data {
+	public func hmac(key: Data) -> Data {
+		return Data(count: 64)
+	}
+}
+
+#endif
+
 extension StringProtocol where Index == String.Index {
 	public func token(key: Data, nonce: Data) -> String? {
 		guard let data = data(using: .ascii) else { return nil }
@@ -121,6 +161,9 @@ extension StringProtocol where Index == String.Index {
 		return (nonce + hmac).base64EncodedString()
 	}
 }
+
+
+// MARK: - HTTP & SSH
 
 public func request(url: URL, method: String = "GET", _ done: @escaping (RequestResult) -> Void) -> Void {
 	struct URLSessionStore {
@@ -190,7 +233,7 @@ public func ssh(mode: ProxyMode, to ip: Substring, _ done: @escaping (Process) -
 		}
 	}
 
-	guard let config = Bundle.main.path(forResource: "ssh_config", ofType: nil) else {
+	guard let config = ProxyBundle.path(forResource: "ssh_config", ofType: nil) else {
 		throw InternalError.noSSHConfig
 	}
 
@@ -202,3 +245,24 @@ public func ssh(mode: ProxyMode, to ip: Substring, _ done: @escaping (Process) -
 	ssh.terminationHandler = done
 	try ssh.run()
 }
+
+
+#if os(Linux)
+// MARK: - Background Activity
+
+public class NSBackgroundActivityScheduler {
+	public enum QualityOfService {
+		case utility
+		case `default`
+	}
+	public typealias CompletionHandler = (NSBackgroundActivityScheduler.Result) -> Void
+	public enum Result {
+		case finished
+	}
+	public var interval: TimeInterval = .infinity
+	public var repeats: Bool = false
+	public var qualityOfService: QualityOfService = .default
+	public init(identifier: String) {}
+	public func schedule(_ block: @escaping (@escaping NSBackgroundActivityScheduler.CompletionHandler) -> Void) {}
+}
+#endif
