@@ -172,7 +172,6 @@ public func request(url: URL, method: String = "GET", _ done: @escaping (Request
 			config.httpCookieAcceptPolicy = .never
 			config.httpShouldSetCookies = false
 			config.urlCache = nil
-			config.waitsForConnectivity = true
 			return URLSession(configuration: config)
 		}()
 	}
@@ -209,7 +208,6 @@ public func request(url: URL, method: String = "GET", _ done: @escaping (Request
 			done(.error(.invalidResponse(response)))
 		}
 	}
-	task.countOfBytesClientExpectsToReceive = 1024
 	task.resume()
 }
 
