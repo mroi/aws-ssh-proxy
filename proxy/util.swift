@@ -145,14 +145,14 @@ extension Data {
 	public func hmac(key: Data) -> Data {
 		let algorithm = CCHmacAlgorithm(kCCHmacAlgSHA256)
 		let digestLength = Int(CC_SHA256_DIGEST_LENGTH)
-		return withUnsafeBytes { data in
-			let result = UnsafeMutablePointer<UInt8>.allocate(capacity: digestLength)
-			defer { result.deallocate() }
+		let digest = UnsafeMutablePointer<UInt8>.allocate(capacity: digestLength)
+		defer { digest.deallocate() }
+		withUnsafeBytes { data in
 			key.withUnsafeBytes { key in
-				CCHmac(algorithm, key.baseAddress!, key.count, data.baseAddress!, data.count, result)
+				CCHmac(algorithm, key.baseAddress!, key.count, data.baseAddress!, data.count, digest)
 			}
-			return Data(bytes: result, count: digestLength)
 		}
+		return Data(bytes: digest, count: digestLength)
 	}
 }
 
