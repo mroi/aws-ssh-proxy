@@ -291,18 +291,31 @@ public func ssh(mode: ProxyMode, to ip: Substring, _ done: @escaping (Process) -
 // MARK: - Background Activity
 
 public class NSBackgroundActivityScheduler {
-	public enum QualityOfService {
-		case utility
-		case `default`
-	}
-	public typealias CompletionHandler = (NSBackgroundActivityScheduler.Result) -> Void
+	public typealias CompletionHandler = (Result) -> Void
 	public enum Result {
 		case finished
 	}
+	public let identifier: String
 	public var interval: TimeInterval = .infinity
 	public var repeats: Bool = false
-	public var qualityOfService: QualityOfService = .default
-	public init(identifier: String) {}
-	public func schedule(_ block: @escaping (@escaping NSBackgroundActivityScheduler.CompletionHandler) -> Void) {}
+	public var qualityOfService: DispatchQoS = .unspecified
+	public init(identifier: String) {
+		self.identifier = identifier
+	}
+	public func schedule(_ block: @escaping (@escaping CompletionHandler) -> Void) {
+		let queue = DispatchQueue(label: identifier, qos: qualityOfService)
+		var time = DispatchTime.now() + interval
+		func recurse(_ block: @escaping (@escaping () -> Void) -> Void) -> () -> Void {
+			return { block(recurse(block)) }
+		}
+		let work = DispatchWorkItem(block: recurse { next in
+			block { _ in }
+			if self.repeats && self.interval < .infinity {
+				time = time + self.interval
+				queue.asyncAfter(deadline: time, execute: next)
+			}
+		})
+		queue.asyncAfter(deadline: time, execute: work)
+	}
 }
 #endif
