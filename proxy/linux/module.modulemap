@@ -1,0 +1,5 @@
+module Sodium [system] {
+	header "sodium.h"
+	link "sodium"
+	export *
+}

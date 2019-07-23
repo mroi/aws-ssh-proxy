@@ -158,14 +158,39 @@ extension Data {
 
 #elseif os(Linux)
 
-// FIXME: implement random and HMac on Linux
+import Sodium
+
 public func random(bytes: Int) throws -> Data {
-	return Data(count: bytes)
+	guard sodium_init() >= 0 else {
+		throw InternalError.noRandom
+	}
+	var data = Data(count: bytes)
+	data.withUnsafeMutableBytes {
+		randombytes_buf($0.baseAddress!, $0.count)
+	}
+	return data
 }
 
 extension Data {
 	public func hmac(key: Data) -> Data {
-		return Data(count: 64)
+		let digestLength = Int(crypto_auth_hmacsha256_BYTES)
+		let state = UnsafeMutablePointer<crypto_auth_hmacsha256_state>.allocate(capacity: 1)
+		defer { state.deallocate() }
+		let digest = UnsafeMutablePointer<UInt8>.allocate(capacity: digestLength)
+		defer { digest.deallocate() }
+		withUnsafeBytes { dataMemory in
+			key.withUnsafeBytes { keyMemory in
+				let data = dataMemory.bindMemory(to: UInt8.self)
+				let key = keyMemory.bindMemory(to: UInt8.self)
+				var result: Int32
+				result = crypto_auth_hmacsha256_init(state, key.baseAddress!, key.count)
+				guard result == 0 else { return }
+				result = crypto_auth_hmacsha256_update(state, data.baseAddress!, UInt64(data.count))
+				guard result == 0 else { return }
+				result = crypto_auth_hmacsha256_final(state, digest)
+			}
+		}
+		return Data(bytes: digest, count: digestLength)
 	}
 }
 
