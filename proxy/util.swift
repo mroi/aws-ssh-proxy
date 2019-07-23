@@ -210,7 +210,11 @@ extension StringProtocol where Index == String.Index {
 public func request(url: URL, method: String = "GET", _ done: @escaping (RequestResult) -> Void) -> Void {
 	struct URLSessionStore {
 		static let session: URLSession = {
+		  #if os(Linux)
+			let config = URLSessionConfiguration.default
+		  #else
 			let config = URLSessionConfiguration.ephemeral
+		  #endif
 			config.httpCookieAcceptPolicy = .never
 			config.httpShouldSetCookies = false
 			config.urlCache = nil
