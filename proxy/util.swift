@@ -17,11 +17,28 @@ public struct ProxyBundle {
 		return Bundle.main.path(forResource: name, ofType: type)
 	}
   #elseif os(Linux)
-	// FIXME
-	public static var bundleIdentifier: String? { return "" }
-	public static var bundlePath: String { return "." }
+	public static var bundleIdentifier: String? { return "ssh-proxy" }
+	public static let bundlePath: String = {
+		let executable = URL(fileURLWithPath: "/proc/self/exe").resolvingSymlinksInPath()
+		let binDir = executable.deletingLastPathComponent()
+		var bundleDir = binDir.appendingPathComponent("../share/ssh-proxy", isDirectory: true)
+		bundleDir.standardize()
+		return bundleDir.path
+	}()
 	public static func path(forResource name: String?, ofType type: String?) -> String? {
-		return ""
+		guard let name = name else { return nil }
+		let bundleDir = URL(fileURLWithPath: bundlePath)
+		let resource: URL
+		if let type = type {
+			resource = bundleDir.appendingPathComponent(name + "." + type)
+		} else {
+			resource = bundleDir.appendingPathComponent(name)
+		}
+		if let result = try? resource.checkResourceIsReachable(), result {
+			return resource.path
+		} else {
+			return nil
+		}
 	}
   #endif
 }
