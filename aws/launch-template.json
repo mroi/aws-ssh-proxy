@@ -5,6 +5,7 @@
 		"InstanceInitiatedShutdownBehavior": "terminate",
 		"InstanceType": "t3.nano",
 		"KeyName": "ssh-proxy",
+		"UserData": "I2Nsb3VkLWNvbmZpZwpib290Y21kOgogLSBbIHl1bSwgLXksIGluc3RhbGwsIHNvY2F0IF0K",
 		"BlockDeviceMappings": [
 			{
 				"DeviceName": "/dev/xvda",
