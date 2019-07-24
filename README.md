@@ -112,12 +112,17 @@ A useful SSH config file, which establishes a local connection when possible and
 via proxy when necessary looks like this:
 
 ```
-Match host <hostnames> exec "route get %h.local"
+Match host <hostnames> exec "route get %h.local &> /dev/null"
 HostName %h.local
 
 Match host <hostnames>
 ProxyCommand /path/to/SSHProxy.bundle/Contents/MacOS/ssh-connect --endpoint %h --key <secret> --url <url>
 ```
 
+You can also read the secret from a file using shell command substitution (`` `cat 
+<keyfile>` ``). Be aware that the secret is still exposed to all users on the machine 
+through the list of all running processes and their arguments.
+
+___
 This work is licensed under the [WTFPL](http://www.wtfpl.net/), so you can do anything you 
 want with it.
