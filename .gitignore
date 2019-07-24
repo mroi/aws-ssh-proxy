@@ -5,3 +5,4 @@
 /proxy/.build
 /proxy/.install
 /proxy/SSHProxy.xcodeproj
+/proxy/shell.nix
