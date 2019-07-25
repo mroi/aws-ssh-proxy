@@ -1,7 +1,7 @@
 .PHONY: all connect forward log xcode clean cleanall
 
-KEY ?= $(shell php -r 'include "../config.php"; echo $$secret;')
-URL ?= $(shell php -r 'include "../config.php"; echo $$url;')
+SECRET ?= $(shell php -r 'include "../config.php"; echo $$secret;')
+SERVER ?= $(shell php -r 'include "../config.php"; echo $$server;')
 
 ifeq ($(shell uname),Darwin)
 
@@ -12,7 +12,7 @@ SIGNING_ID ?= $(shell id -F)
 USERNAME   ?= $(shell id -nu)
 
 # used to fill in launchd.plist
-export BUNDLE_ID DESTDIR ENDPOINT KEY URL USERNAME
+export BUNDLE_ID DESTDIR ENDPOINT SECRET SERVER USERNAME
 
 TOPLEVEL = \
 	$(DESTDIR)/SSHProxy.bundle/Contents/Info.plist
@@ -68,7 +68,7 @@ $(RESOURCES): $(call dirname,$(RESOURCES))/%: resources/%
 	swift build --product $(@F) --configuration release
 
 connect forward: all
-	$(call dirname,$(BINARIES))/ssh-$@ --endpoint $(ENDPOINT) --key $(KEY) --url $(URL)
+	$(call dirname,$(BINARIES))/ssh-$@ --endpoint $(ENDPOINT) --key $(SECRET) --url $(SERVER)
 
 xcode:
 	swift package generate-xcodeproj

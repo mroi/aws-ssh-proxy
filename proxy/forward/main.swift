@@ -72,7 +72,7 @@ do {
 }
 catch let error as ArgumentError {
 	print(error)
-	print("Usage: ssh-forward --endpoint <name> --key <secret> --url <url>")
+	print("Usage: ssh-forward --endpoint <name> --key <secret> --url <server>")
 	exit(EX_USAGE)
 }
 catch let error as InternalError {
