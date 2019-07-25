@@ -15,6 +15,7 @@ $hmac = substr($auth, 10);
 // you can override these variables in config.php
 $region = isset($region) ? $region : getenv('AWS_DEFAULT_REGION');
 $secret = isset($secret) ? $secret : exit();
+$accept = isset($accept) ? $accept : array();
 
 header('Content-Type: text/plain');
 header('Cache-Control: no-store, no-cache, must-revalidate, max-age=0');
@@ -22,6 +23,10 @@ header('Cache-Control: no-store, no-cache, must-revalidate, max-age=0');
 // check request authentication
 if (!hash_equals($hmac, hash_hmac('sha256', $nonce . $command . '?' . $endpoint, $secret, true))) {
 	header($_SERVER['SERVER_PROTOCOL'] . ' 401 Unauthorized');
+	exit();
+}
+if (!empty($accept) && !in_array($endpoint, $accept)) {
+	header($_SERVER['SERVER_PROTOCOL'] . ' 403 Forbidden');
 	exit();
 }
 
