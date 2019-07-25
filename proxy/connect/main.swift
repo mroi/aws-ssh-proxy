@@ -13,41 +13,34 @@ do {
 	let token = query.token(key: arguments.key, nonce: nonce)!
 	let url = URL(string: "\(query)&\(token)", relativeTo: arguments.url)!
 
-	var performRequest: (() -> Void)!
-	performRequest = {
-		request(url: url, method: "POST") { result in
-			// check response of VM launch
-			do {
-				switch result {
-				case .nothing:
-					break
+	request(url: url, method: "POST") { result in
+		// check response of VM launch
+		do {
+			switch result {
+			case .nothing:
+				break
 
-				case .proxy(let proxy):
-					guard let token = proxy.ip.token(key: arguments.key, nonce: nonce) else {
-						throw RequestError.invalidResponse(String(proxy.ip))
-					}
-					guard token == proxy.token else {
-						throw RequestError.unauthorized(proxy)
-					}
-					try ssh(mode: .connect, to: proxy.ip) { ssh in
-						exit(ssh.terminationStatus)
-					}
-					return
-
-				case .error(let error):
-					throw error
+			case .proxy(let proxy):
+				guard let token = proxy.ip.token(key: arguments.key, nonce: nonce) else {
+					throw RequestError.invalidResponse(String(proxy.ip))
 				}
-			}
-			catch {
-				print(error)
-			}
-			// retry until success
-			DispatchQueue.main.asyncAfter(deadline: .now() + 5) {
-				performRequest()
+				guard token == proxy.token else {
+					throw RequestError.unauthorized(proxy)
+				}
+				try ssh(mode: .connect, to: proxy.ip) { ssh in
+					exit(ssh.terminationStatus)
+				}
+				return
+
+			case .error(let error):
+				throw error
 			}
 		}
+		catch {
+			print(error)
+			exit(EX_PROTOCOL)
+		}
 	}
-	performRequest()
 
 	RunLoop.main.run()
 }
