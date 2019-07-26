@@ -36,6 +36,15 @@
 		},
 		{
 			"Effect": "Allow",
+			"Action": "ec2:RunInstances",
+			"Resource": [
+				"arn:aws:ec2:eu-central-1:<account>:subnet/subnet-<ID>",
+				"arn:aws:ec2:eu-central-1:<account>:subnet/subnet-<ID>",
+				"arn:aws:ec2:eu-central-1:<account>:subnet/subnet-<ID>"
+			]
+		},
+		{
+			"Effect": "Allow",
 			"Action": "ec2:CreateTags",
 			"Resource": "*",
 			"Condition": {

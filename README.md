@@ -31,14 +31,14 @@ steps. You will find everything you need for this setup in the
    [`security-group.json`](https://github.com/mroi/aws-ssh-proxy/blob/master/aws/security-group.json) 
    and its ingress permissions from 
    [`security-group-ingress.json`](https://github.com/mroi/aws-ssh-proxy/blob/master/aws/security-group-ingress.json).
-4. Create a VPC subnet under the default VPC or any other.
-5. Create an EC2 launch template from
+4. Create an EC2 launch template from
    [`launch-template.json`](https://github.com/mroi/aws-ssh-proxy/blob/master/aws/launch-template.json). 
-   Replace the security group and subnet IDs with the ones created above.
-6. Finally, configure 
+   Replace the security group ID with the one created above.
+5. Finally, configure
    [`iam-policy.json`](https://github.com/mroi/aws-ssh-proxy/blob/master/aws/iam-policy.json) 
    as the IAM user’s inline permission policy. Replace the account number with your AWS 
-   account ID and the launch template ID with the one you created above.
+   account ID and the launch template ID with the one you created above. Also list the 
+   default VPC subnets, where launched instances may be placed.
 
 PHP Web Service
 ---------------
@@ -116,7 +116,7 @@ Match host <hostnames> exec "route get %h.local &> /dev/null"
 HostName %h.local
 
 Match host <hostnames>
-ProxyCommand /path/to/SSHProxy.bundle/Contents/MacOS/ssh-connect --endpoint %h --key <secret> --url <url>
+ProxyCommand /path/to/SSHProxy.bundle/Contents/MacOS/ssh-connect --endpoint %h --key <secret> --url <server>
 ```
 
 You can also read the secret from a file using shell command substitution (`` `cat 
