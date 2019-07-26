@@ -5,9 +5,9 @@ Connecting to remote machines via SSH becomes increasingly complicated, when the
 are hidden behind residential routers or corporate firewalls. In these situations, a 
 high-bandwidth SSH proxy is useful that can be reached from anywhere.
 
-This project provides such a proxy using Amazon EC2 virtual machines. It specifically 
-targets macOS machines and can be used to replace Apple’s discontinued Back To My Mac 
-service for remote management using an SSH command line.
+This project provides such a proxy using Amazon EC2 virtual machines. It targets macOS 
+machines and can be used to replace Apple’s discontinued Back To My Mac service for remote 
+management using an SSH command line. Linux support should also work, but is less tested.
 
 The system consists of four pieces:
 * some initial setup at Amazon,

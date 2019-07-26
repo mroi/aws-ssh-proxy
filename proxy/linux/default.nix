@@ -1,11 +1,11 @@
 with import <nixpkgs> {};
 clangStdenv.mkDerivation {
-	name = "ssh-proxy-2019-07-24";
+	name = "ssh-proxy-2019-07-26";
 	src = fetchFromGitHub {
 		owner = "mroi";
 		repo = "aws-ssh-proxy";
-		rev = "f8972d4";
-		sha256 = "1ig8ankyzid1a2lglq1rs0kma1av40n19ghhcz67bfly89c5c554";
+		rev = "155a083";
+		sha256 = "1dw0s5k63wy4f2mvr552x1knl02j1p0src5vy942x72rbfbpan5l";
 	};
 	nativeBuildInputs = [ swift pkg-config ];
 	buildInputs = [ libsodium ];
