@@ -6,7 +6,7 @@ require('aws.phar');
 $command = explode('?', $_SERVER['REQUEST_URI'])[0];
 $command = trim($command, '/');
 $endpoint = explode('&', $_SERVER['QUERY_STRING'])[0];
-$endpoint = preg_replace('/[^A-Za-z0-9]/', '', $endpoint);
+$endpoint = preg_replace('/[^A-Za-z0-9-]/', '', $endpoint);
 $auth = explode('&', $_SERVER['QUERY_STRING'])[1];
 $auth = base64_decode($auth);
 $nonce = substr($auth, 0, 10);
