@@ -28,7 +28,7 @@ all: $(TOPLEVEL) $(BINARIES) $(RESOURCES) \
 
 $(DESTDIR)/SSHProxy.bundle/Contents/Resources/$(BUNDLE_ID).plist: resources/launchd.plist resources/Info.plist ../config.php
 	mkdir -p $(@D)
-	eval "`echo "cat << EOF\n$$(<$<)\nEOF"`" > $@
+	eval "`echo "cat << EOF\n$$(cat $<)\nEOF"`" > $@
 
 $(DESTDIR)/SSHProxy.bundle/Contents/_CodeSignature/CodeResources: $(TOPLEVEL) $(BINARIES) $(RESOURCES)
 	codesign -f --deep -s "$(SIGNING_ID)" -i $(BUNDLE_ID) -o kill,hard,runtime $(DESTDIR)/SSHProxy.bundle
