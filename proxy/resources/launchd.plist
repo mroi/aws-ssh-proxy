@@ -12,9 +12,9 @@
 		<string>--endpoint</string>
 		<string>${ENDPOINT}</string>
 		<string>--key</string>
-		<string>${KEY}</string>
+		<string>${SECRET}</string>
 		<string>--url</string>
-		<string>${URL}</string>
+		<string>${SERVER}</string>
 	</array>
 	<key>StartInterval</key>
 	<integer>300</integer>
