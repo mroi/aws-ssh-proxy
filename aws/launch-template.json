@@ -3,7 +3,7 @@
 	"LaunchTemplateData": {
 		"DisableApiTermination": false,
 		"InstanceInitiatedShutdownBehavior": "terminate",
-		"InstanceType": "t3.nano",
+		"InstanceType": "t3a.nano",
 		"KeyName": "ssh-proxy",
 		"UserData": "I2Nsb3VkLWNvbmZpZwpib290Y21kOgogLSBbIHl1bSwgLXksIGluc3RhbGwsIHNvY2F0IF0K",
 		"BlockDeviceMappings": [
