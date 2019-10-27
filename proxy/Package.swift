@@ -1,4 +1,4 @@
-// swift-tools-version:5.0
+// swift-tools-version:5.1
 import PackageDescription
 
 func isLinux<T>(_ array: Array<T>) -> Array<T> {
