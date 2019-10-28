@@ -1,7 +1,4 @@
 import Foundation
-#if os(Linux)
-import FoundationNetworking
-#endif
 import ProxySandbox
 
 
@@ -209,6 +206,10 @@ extension StringProtocol where Index == String.Index {
 
 
 // MARK: - HTTP & SSH
+
+#if os(Linux)
+import FoundationNetworking
+#endif
 
 public func request(url: URL, method: String = "GET", _ done: @escaping (RequestResult) -> Void) -> Void {
 	struct URLSessionStore {
