@@ -1,0 +1,192 @@
+{
+	"AWSTemplateFormatVersion": "2010-09-09",
+	"Resources": {
+		"SSHProxySecurityGroup": {
+			"Type": "AWS::EC2::SecurityGroup",
+			"Properties": {
+				"GroupName": {
+					"Ref": "AWS::StackName"
+				},
+				"GroupDescription": "ssh access allowed via port 22 from anywhere",
+				"SecurityGroupIngress": [
+					{
+						"CidrIp": "0.0.0.0/0",
+						"Description": "ssh access from anywhere",
+						"IpProtocol": "tcp",
+						"FromPort": 22,
+						"ToPort": 22
+					},
+					{
+						"CidrIpv6": "::/0",
+						"Description": "ssh access from anywhere",
+						"IpProtocol": "tcp",
+						"FromPort": 22,
+						"ToPort": 22
+					}
+				]
+			}
+		},
+		"SSHProxyLaunchTemplate": {
+			"Type": "AWS::EC2::LaunchTemplate",
+			"Properties": {
+				"LaunchTemplateName": {
+					"Ref": "AWS::StackName"
+				},
+				"LaunchTemplateData": {
+					"DisableApiTermination": false,
+					"InstanceInitiatedShutdownBehavior": "terminate",
+					"InstanceType": "t3a.nano",
+					"KeyName": {
+						"Ref": "AWS::StackName"
+					},
+					"UserData": {
+						"Fn::Base64": {
+							"Fn::Join": [
+								"\n",
+								[
+									"#cloud-config",
+									"bootcmd:",
+									" - [ yum, -y, install, socat ]",
+									""
+								]
+							]
+						}
+					},
+					"BlockDeviceMappings": [
+						{
+							"DeviceName": "/dev/xvda",
+							"Ebs": {
+								"DeleteOnTermination": true,
+								"VolumeType": "gp2"
+							}
+						}
+					],
+					"CreditSpecification": {
+						"CpuCredits": "standard"
+					},
+					"Monitoring": {
+						"Enabled": false
+					},
+					"NetworkInterfaces": [
+						{
+							"AssociatePublicIpAddress": true,
+							"DeleteOnTermination": true,
+							"DeviceIndex": 0,
+							"Groups": [
+								{
+									"Fn::GetAtt": [
+										"SSHProxySecurityGroup",
+										"GroupId"
+									]
+								}
+							]
+						}
+					],
+					"Placement": {
+						"Tenancy": "default"
+					},
+					"TagSpecifications": [
+						{
+							"ResourceType": "instance",
+							"Tags": [
+								{
+									"Value": "<undefined>",
+									"Key": "ssh-proxy"
+								}
+							]
+						}
+					]
+				}
+			}
+		},
+		"SSHProxyUser": {
+			"Type": "AWS::IAM::User",
+			"Properties": {
+				"UserName": {
+					"Ref": "AWS::StackName"
+				},
+				"Policies": [
+					{
+						"PolicyName": {
+							"Ref": "AWS::StackName"
+						},
+						"PolicyDocument": {
+							"Version": "2012-10-17",
+							"Statement": [
+								{
+									"Effect": "Allow",
+									"Action": "ec2:DescribeInstances",
+									"Resource": "*"
+								},
+								{
+									"Effect": "Allow",
+									"Action": "ec2:DescribeImages",
+									"Resource": "*"
+								},
+								{
+									"Effect": "Allow",
+									"Action": "ec2:RunInstances",
+									"Resource": "*",
+									"Condition": {
+										"StringEquals": {
+											"ec2:LaunchTemplate": {
+												"Fn::Sub": "arn:aws:ec2:${AWS::Region}:${AWS::AccountId}:launch-template/${SSHProxyLaunchTemplate}"
+											}
+										},
+										"Bool": {
+											"ec2:IsLaunchTemplateResource": "true"
+										}
+									}
+								},
+								{
+									"Effect": "Allow",
+									"Action": "ec2:RunInstances",
+									"Resource": {
+										"Fn::Sub": "arn:aws:ec2:${AWS::Region}::image/ami-*"
+									},
+									"Condition": {
+										"StringEquals": {
+											"ec2:Owner": "amazon"
+										}
+									}
+								},
+								{
+									"Effect": "Allow",
+									"Action": "ec2:RunInstances",
+									"Resource": {
+										"Fn::Sub": "arn:aws:ec2:${AWS::Region}:${AWS::AccountId}:subnet/*"
+									}
+								},
+								{
+									"Effect": "Allow",
+									"Action": "ec2:CreateTags",
+									"Resource": "*",
+									"Condition": {
+										"StringEquals": {
+											"ec2:CreateAction": "RunInstances"
+										},
+										"ForAllValues:StringEquals": {
+											"aws:TagKeys": [
+												"ssh-proxy"
+											]
+										}
+									}
+								},
+								{
+									"Effect": "Allow",
+									"Action": "ec2:TerminateInstances",
+									"Resource": "*",
+									"Condition": {
+										"StringLike": {
+											"ec2:ResourceTag/ssh-proxy": "*"
+										}
+									}
+								}
+							]
+						}
+					}
+				]
+			}
+		}
+	}
+}

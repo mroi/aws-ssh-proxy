@@ -26,19 +26,13 @@ steps. You will find everything you need for this setup in the
 
 1. Create an SSH key pair and upload the public key to EC2 with the name `ssh-proxy`. Store 
    the keys in a files `proxy` and `proxy.pub` in your `~/.ssh` directory.
-2. Create an IAM user (recommended name is `ssh-proxy`) and keep its credentials.
-3. Create an EC2 security group from 
-   [`security-group.json`](https://github.com/mroi/aws-ssh-proxy/blob/master/aws/security-group.json) 
-   and its ingress permissions from 
-   [`security-group-ingress.json`](https://github.com/mroi/aws-ssh-proxy/blob/master/aws/security-group-ingress.json).
-4. Create an EC2 launch template from
-   [`launch-template.json`](https://github.com/mroi/aws-ssh-proxy/blob/master/aws/launch-template.json). 
-   Replace the security group ID with the one created above.
-5. Finally, configure
-   [`iam-policy.json`](https://github.com/mroi/aws-ssh-proxy/blob/master/aws/iam-policy.json) 
-   as the IAM user’s inline permission policy. Replace the account number with your AWS 
-   account ID and the launch template ID with the one you created above. Also list the 
-   default VPC subnets, where launched instances may be placed.
+2. Create an AWS stack from 
+   [`aws.json`](https://raw.githubusercontent.com/mroi/aws-ssh-proxy/master/aws.json) using 
+   [CloudFormation](https://aws.amazon.com/cloudformation/), either from the 
+   [AWS Console](https://console.aws.amazon.com/cloudformation) or the 
+   [command line](https://docs.aws.amazon.com/cli/latest/reference/cloudformation/). Use the 
+   name `ssh-proxy` for the stack.
+3. Retain the credentials of the created IAM user `ssh-proxy`.
 
 PHP Web Service
 ---------------
@@ -48,8 +42,9 @@ To install the web service, you need PHP-enabled web space. Follow these steps:
 1. Put [`index.php`](https://github.com/mroi/aws-ssh-proxy/blob/master/index.php) and 
    [`.htaccess`](https://github.com/mroi/aws-ssh-proxy/blob/master/.htaccess) on your web 
    server.
-2. Obtain the latest `aws.phar` from the [AWS SDK 
-   releases](https://github.com/aws/aws-sdk-php/releases) and put it next to `index.php`.
+2. Obtain the latest `aws.phar` from the 
+   [AWS SDK releases](https://github.com/aws/aws-sdk-php/releases) and put it next to 
+   `index.php`.
 3. Make sure your web server also has the credentials of the `ssh-proxy` IAM account stored 
    in its `~/.aws/credentials` file or wherever you keep your AWS credentials. Use a profile 
    name of `ssh-proxy`.
