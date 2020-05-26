@@ -35,14 +35,14 @@ do {
 				case .nothing:
 					break
 
-				case .proxy(let proxy):
-					guard let token = proxy.ip.token(key: arguments.key, nonce: nonce) else {
-						throw RequestError.invalidResponse(String(proxy.ip))
+				case .proxy(let ip, let token):
+					guard let expectedToken = ip.token(key: arguments.key, nonce: nonce) else {
+						throw RequestError.invalidResponse(String(ip))
 					}
-					guard token == proxy.token else {
-						throw RequestError.unauthorized(proxy)
+					guard expectedToken == token else {
+						throw RequestError.unauthorized(ip, token)
 					}
-					try ssh(mode: .forward, to: proxy.ip) { _ in
+					try ssh(mode: .forward, to: ip) { _ in
 						// terminate proxy VM
 						let query = "terminate?\(arguments.endpoint)"
 						let token = query.token(key: arguments.key, nonce: nonce)!

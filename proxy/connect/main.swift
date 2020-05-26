@@ -20,14 +20,14 @@ do {
 			case .nothing:
 				break
 
-			case .proxy(let proxy):
-				guard let token = proxy.ip.token(key: arguments.key, nonce: nonce) else {
-					throw RequestError.invalidResponse(String(proxy.ip))
+			case .proxy(let ip, let token):
+				guard let expectedToken = ip.token(key: arguments.key, nonce: nonce) else {
+					throw RequestError.invalidResponse(String(ip))
 				}
-				guard token == proxy.token else {
-					throw RequestError.unauthorized(proxy)
+				guard expectedToken == token else {
+					throw RequestError.unauthorized(ip, token)
 				}
-				try ssh(mode: .connect, to: proxy.ip) { ssh in
+				try ssh(mode: .connect, to: ip) { ssh in
 					exit(ssh.terminationStatus)
 				}
 				return

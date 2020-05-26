@@ -59,7 +59,7 @@ public enum RequestError: Error {
 	case clientError(_: String)
 	case serverError(_: String)
 	case invalidResponse(_: String)
-	case unauthorized(_: (Substring, Substring))
+	case unauthorized(_: Substring, _: Substring)
 	case noHTTPResponse
 	case noResponse
 }

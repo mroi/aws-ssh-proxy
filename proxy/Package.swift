@@ -1,4 +1,4 @@
-// swift-tools-version:5.1
+// swift-tools-version:5.2
 import PackageDescription
 
 func isLinux<T>(_ array: Array<T>) -> Array<T> {
@@ -12,7 +12,7 @@ func isLinux<T>(_ array: Array<T>) -> Array<T> {
 let package = Package(
 	name: "SSHProxy",
 	platforms: [
-		.macOS(.v10_14)
+		.macOS(.v10_15)
 	],
 	products: [
 		.executable(name: "ssh-connect", targets: ["Connect"]),
