@@ -35,21 +35,18 @@ do {
 			case .error(let error):
 				throw error
 			}
-		}
-		catch {
+		} catch {
 			print(error)
 			exit(EX_PROTOCOL)
 		}
 	}
 
 	RunLoop.main.run()
-}
-catch let error as ArgumentError {
+} catch let error as ArgumentError {
 	print(error)
 	print("Usage: ssh-connect --endpoint <name> --key <secret> --url <server>")
 	exit(EX_USAGE)
-}
-catch let error as InternalError {
+} catch let error as InternalError {
 	print(error)
 	exit(EX_SOFTWARE)
 }

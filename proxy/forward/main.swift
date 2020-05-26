@@ -56,8 +56,7 @@ do {
 				case .error(let error):
 					throw error
 				}
-			}
-			catch {
+			} catch {
 			  #if os(macOS)
 				os_log("%{public}s", type: .error, String(reflecting: error))
 			  #elseif os(Linux)
@@ -69,13 +68,11 @@ do {
 	}
 
 	RunLoop.main.run()
-}
-catch let error as ArgumentError {
+} catch let error as ArgumentError {
 	print(error)
 	print("Usage: ssh-forward --endpoint <name> --key <secret> --url <server>")
 	exit(EX_USAGE)
-}
-catch let error as InternalError {
+} catch let error as InternalError {
 	print(error)
 	exit(EX_SOFTWARE)
 }

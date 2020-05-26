@@ -127,7 +127,6 @@ try {
 	default:
 		header($_SERVER['SERVER_PROTOCOL'] . ' 400 Bad Request');
 	}
-}
-catch (Exception $e) {
+} catch (Exception $e) {
 	header($_SERVER['SERVER_PROTOCOL'] . ' 503 Service Unavailable');
 }
