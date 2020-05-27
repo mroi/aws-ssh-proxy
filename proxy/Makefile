@@ -1,4 +1,4 @@
-.PHONY: all connect forward log xcode clean cleanall
+.PHONY: all connect forward log clean cleanall
 
 SECRET ?= $(shell php -r 'include "../config.php"; echo $$secret;')
 SERVER ?= $(shell php -r 'include "../config.php"; echo $$server;')
@@ -70,12 +70,8 @@ $(RESOURCES): $(call dirname,$(RESOURCES))/%: resources/%
 connect forward: all
 	$(call dirname,$(BINARIES))/ssh-$@ --endpoint $(ENDPOINT) --key $(SECRET) --url $(SERVER)
 
-xcode:
-	swift package generate-xcodeproj
-	open SSHProxy.xcodeproj
-
 clean:
-	rm -rf .build .install SSHProxy.xcodeproj
+	rm -rf .build .install
 
 cleanall: clean
 	rm -rf $(DESTDIR)/SSHProxy.bundle
