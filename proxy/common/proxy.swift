@@ -2,7 +2,7 @@ import Foundation
 import Sandbox
 
 
-// Mark: - Types and Initialization
+// MARK: - Types and Initialization
 
 public func sandbox() -> Void {
 	FileManager.default.changeCurrentDirectoryPath(ProxyBundle.bundlePath)
@@ -51,7 +51,6 @@ public enum ArgumentError: Error {
 
 public enum InternalError: Error {
 	case noBundleId
-	case noRandom
 	case noSSHConfig
 }
 
@@ -126,75 +125,22 @@ public func parseArguments() throws -> (endpoint: String, key: Data, url: URL) {
 // MARK: - Cryptography
 
 #if os(macOS)
-
-import Security
-import CommonCrypto
-
-public func random(bytes: Int) throws -> Data {
-	var data = Data(count: bytes)
-	let result = data.withUnsafeMutableBytes {
-		SecRandomCopyBytes(kSecRandomDefault, $0.count, $0.baseAddress!)
-	}
-	guard result == errSecSuccess else {
-		throw InternalError.noRandom
-	}
-	return data
-}
-
-extension Data {
-	public func hmac(key: Data) -> Data {
-		let algorithm = CCHmacAlgorithm(kCCHmacAlgSHA256)
-		let digestLength = Int(CC_SHA256_DIGEST_LENGTH)
-		let digest = UnsafeMutablePointer<UInt8>.allocate(capacity: digestLength)
-		defer { digest.deallocate() }
-		withUnsafeBytes { data in
-			key.withUnsafeBytes { key in
-				CCHmac(algorithm, key.baseAddress!, key.count, data.baseAddress!, data.count, digest)
-			}
-		}
-		return Data(bytes: digest, count: digestLength)
-	}
-}
-
+import CryptoKit
 #elseif os(Linux)
-
-import Sodium
-
-public func random(bytes: Int) throws -> Data {
-	guard sodium_init() >= 0 else {
-		throw InternalError.noRandom
-	}
-	var data = Data(count: bytes)
-	data.withUnsafeMutableBytes {
-		randombytes_buf($0.baseAddress!, $0.count)
-	}
-	return data
-}
+import Crypto
+#endif
 
 extension Data {
+	public init(randomBytes: Int) {
+		let nonce = AES.GCM.Nonce()
+		assert(nonce.underestimatedCount >= randomBytes)
+		self = Data(nonce.prefix(randomBytes))
+	}
 	public func hmac(key: Data) -> Data {
-		let digestLength = Int(crypto_auth_hmacsha256_BYTES)
-		let state = UnsafeMutablePointer<crypto_auth_hmacsha256_state>.allocate(capacity: 1)
-		defer { state.deallocate() }
-		let digest = UnsafeMutablePointer<UInt8>.allocate(capacity: digestLength)
-		defer { digest.deallocate() }
-		withUnsafeBytes { dataMemory in
-			key.withUnsafeBytes { keyMemory in
-				let data = dataMemory.bindMemory(to: UInt8.self)
-				let key = keyMemory.bindMemory(to: UInt8.self)
-				var result: Int32
-				result = crypto_auth_hmacsha256_init(state, key.baseAddress!, key.count)
-				guard result == 0 else { return }
-				result = crypto_auth_hmacsha256_update(state, data.baseAddress!, UInt64(data.count))
-				guard result == 0 else { return }
-				result = crypto_auth_hmacsha256_final(state, digest)
-			}
-		}
-		return Data(bytes: digest, count: digestLength)
+		let mac = HMAC<SHA256>.authenticationCode(for: self, using: SymmetricKey(data: key))
+		return Data(mac)
 	}
 }
-
-#endif
 
 extension StringProtocol where Index == String.Index {
 	public func token(key: Data, nonce: Data) -> String? {
