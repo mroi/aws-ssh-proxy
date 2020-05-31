@@ -1,5 +1,5 @@
 import Foundation
-import ProxySandbox
+import Sandbox
 
 
 // Mark: - Types and Initialization

@@ -1,6 +1,6 @@
 import Foundation
 import Dispatch
-import ProxyUtil
+import SSHProxy
 
 sandbox()
 

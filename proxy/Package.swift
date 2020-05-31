@@ -19,10 +19,10 @@ let package = Package(
 		.executable(name: "ssh-forward", targets: ["Forward"])
 	],
 	targets: [
-		.target(name: "Connect", dependencies: ["ProxyUtil"], path: "connect"),
-		.target(name: "Forward", dependencies: ["ProxyUtil"], path: "forward"),
-		.target(name: "ProxyUtil", dependencies: ["ProxySandbox"] + isLinux(["Sodium"]), path: ".", sources: ["util.swift"]),
-		.target(name: "ProxySandbox", path: ".", sources: ["sandbox.c"], publicHeadersPath: ".")
+		.target(name: "Connect", dependencies: ["SSHProxy"], path: "connect"),
+		.target(name: "Forward", dependencies: ["SSHProxy"], path: "forward"),
+		.target(name: "SSHProxy", dependencies: ["Sandbox"] + isLinux(["Sodium"]), path: "common", sources: ["proxy.swift"]),
+		.target(name: "Sandbox", path: "common", sources: ["sandbox.c"], publicHeadersPath: ".")
 	] + isLinux([
 		.systemLibrary(name: "Sodium", path: "linux", pkgConfig: "libsodium")
 	])

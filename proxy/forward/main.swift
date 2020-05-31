@@ -1,5 +1,5 @@
 import Foundation
-import ProxyUtil
+import SSHProxy
 
 #if os(macOS)
 import os.log
