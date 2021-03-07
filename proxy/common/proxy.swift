@@ -157,7 +157,7 @@ extension StringProtocol where Index == String.Index {
 import FoundationNetworking
 #endif
 
-public func request(url: URL, method: String = "GET", _ done: @escaping (RequestResult) -> Void) -> Void {
+public func request(_ url: URL, method: String = "GET", done: @escaping (RequestResult) -> Void) -> Void {
 	struct URLSessionStore {
 		static let session: URLSession = {
 		  #if os(Linux)

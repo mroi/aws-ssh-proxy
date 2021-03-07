@@ -26,7 +26,7 @@ do {
 		let url = URL(string: "\(query)&\(token)", relativeTo: arguments.url)!
 
 		// query VM status and check response
-		request(url: url) { result in
+		request(url) { result in
 			do {
 				switch result {
 				case .nothing:
@@ -44,7 +44,7 @@ do {
 						let query = "terminate?\(arguments.endpoint)"
 						let token = query.token(key: arguments.key, nonce: nonce)!
 						let url = URL(string: "\(query)&\(token)", relativeTo: arguments.url)!
-						request(url: url, method: "POST") { _ in
+						request(url, method: "POST") { _ in
 							done(.finished)
 						}
 					}

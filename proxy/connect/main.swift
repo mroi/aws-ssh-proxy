@@ -13,7 +13,7 @@ do {
 	let token = query.token(key: arguments.key, nonce: nonce)!
 	let url = URL(string: "\(query)&\(token)", relativeTo: arguments.url)!
 
-	request(url: url, method: "POST") { result in
+	request(url, method: "POST") { result in
 		// check response of VM launch
 		do {
 			switch result {
