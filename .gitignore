@@ -4,5 +4,6 @@
 /config.php
 /proxy/.build
 /proxy/.install
+/proxy/Package.resolved
 /proxy/SSHProxy.xcodeproj
 /proxy/shell.nix

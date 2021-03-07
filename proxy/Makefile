@@ -71,7 +71,7 @@ connect forward: all
 	$(call dirname,$(BINARIES))/ssh-$@ --endpoint $(ENDPOINT) --key $(SECRET) --url $(SERVER)
 
 clean:
-	rm -rf .build .install
+	rm -rf .build .install Package.resolved
 
 cleanall: clean
 	rm -rf $(DESTDIR)/SSHProxy.bundle
