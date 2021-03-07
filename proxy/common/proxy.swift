@@ -237,9 +237,9 @@ public func ssh(mode: ProxyMode, to ip: Substring, _ done: @escaping (Process) -
 }
 
 
-#if os(Linux)
 // MARK: - Background Activity
 
+#if os(Linux)
 public class NSBackgroundActivityScheduler {
 	public typealias CompletionHandler = (Result) -> Void
 	public enum Result {
@@ -266,6 +266,24 @@ public class NSBackgroundActivityScheduler {
 			}
 		})
 		queue.asyncAfter(deadline: time, execute: work)
+	}
+}
+#endif
+
+
+// MARK: - Logging
+
+#if os(macOS)
+@_exported import os
+#elseif os(Linux)
+public struct Logger {
+	public init() {}
+	public func error(_ message: String) { print(message) }
+}
+public extension DefaultStringInterpolation {
+	enum Privacy { case `public` }
+	mutating func appendInterpolation(_ text: String, privacy: Privacy) {
+		appendInterpolation(privacy == .public ? text : "<private>")
 	}
 }
 #endif

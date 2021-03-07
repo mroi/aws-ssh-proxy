@@ -1,10 +1,6 @@
 import Foundation
 import SSHProxy
 
-#if os(macOS)
-import os.log
-#endif
-
 sandbox()
 
 do {
@@ -54,11 +50,7 @@ do {
 					throw error
 				}
 			} catch {
-			  #if os(macOS)
-				os_log("%{public}s", type: .error, String(reflecting: error))
-			  #elseif os(Linux)
-				print(String(reflecting: error))
-			  #endif
+				Logger().error("\(String(reflecting: error), privacy: .public)")
 			}
 			done(.finished)
 		}
