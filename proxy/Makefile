@@ -6,7 +6,7 @@ PREFIX ?= .product
 
 ifeq ($(shell uname),Darwin)
 
-BUNDLE_ID   = $(shell PlistBuddy -c 'Print CFBundleIdentifier' resources/Info.plist)
+BUNDLE_ID   = $(shell PlistBuddy -c 'Print CFBundleIdentifier' resources/Info.plist | tr -d '"')
 DESTDIR    ?= /Users/Shared/Library/CoreServices
 ENDPOINT   ?= $(shell scutil --get LocalHostName)
 SIGNING_ID ?= $(shell id -F)
@@ -30,10 +30,10 @@ all: $(TOPLEVEL) $(BINARIES) $(RESOURCES)
 
 install:
 	$(MAKE) PREFIX=$(DESTDIR) all
-	codesign -f --deep -s "$(SIGNING_ID)" -i $(BUNDLE_ID) -o kill,hard,runtime $(DESTDIR)/SSHProxy.bundle
+	-codesign -f --deep -s "$(SIGNING_ID)" -i $(BUNDLE_ID) -o kill,hard,runtime $(DESTDIR)/SSHProxy.bundle
 
-resources/$(BUNDLE_ID).plist: resources/launchd.plist resources/Info.plist ../config.php
-	eval "`echo "cat << EOF\n$$(cat $<)\nEOF"`" > $@
+resources/$(BUNDLE_ID).plist: resources/launchd.plist resources/Info.plist $(wildcard ../config.php)
+	eval "`printf "cat << EOF\n$$(cat $<)\nEOF"`" > $@
 
 log:
 	@log stream --predicate '(process BEGINSWITH "ssh") OR (eventMessage CONTAINS "ssh")'
