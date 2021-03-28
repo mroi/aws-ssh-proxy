@@ -124,11 +124,7 @@ public func parseArguments() throws -> (endpoint: String, key: Data, url: URL) {
 
 // MARK: - Cryptography
 
-#if os(macOS)
-import CryptoKit
-#elseif os(Linux)
 import Crypto
-#endif
 
 extension Data {
 	public init(randomBytes: Int) {
