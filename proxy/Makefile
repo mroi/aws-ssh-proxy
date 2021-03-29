@@ -67,9 +67,25 @@ $(RESOURCES): $(call dirname,$(RESOURCES))/%: resources/%
 .build/release/ssh-connect .build/release/ssh-forward: .build/release/ssh-%: %/main.swift $(wildcard common/*)
 	rm -f $@
 	swift build --product $(@F) --configuration release
+	$(MAKE) .check
+
+# check downloaded packages against known-good versions
+.check: $(wildcard .build/checkouts/*)
+ifneq ($(shell which nix),)
+	@for pkg in $? ; do \
+		test -d $$pkg/.git && mv $$pkg/.git .build/ ; \
+		hash=$$(nix hash-path $$pkg) ; \
+		if ! grep -qF "$$hash" ../flake.lock ; then \
+			echo "$$pkg is not a known-good version" ; \
+			exit 1 ; \
+		fi ; \
+		test -d .build/.git && mv .build/.git $$pkg/ ; \
+	done ; \
+	touch $@
+endif
 
 connect forward: all
 	$(call dirname,$(BINARIES))/ssh-$@ --endpoint $(ENDPOINT) --key $(SECRET) --url $(SERVER)
 
 clean:
-	rm -rf .build $(PREFIX) Package.resolved
+	rm -rf .build .check $(PREFIX) Package.resolved

@@ -3,6 +3,7 @@
 /aws.phar
 /config.php
 /proxy/.build
+/proxy/.check
 /proxy/.product
 /proxy/Package.resolved
 /proxy/shell.nix
