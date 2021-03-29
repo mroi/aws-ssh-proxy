@@ -1,7 +1,8 @@
-.PHONY: all connect forward log clean cleanall
+.PHONY: all install log connect forward clean
 
 SECRET ?= $(shell php -r 'include "../config.php"; echo $$secret;')
 SERVER ?= $(shell php -r 'include "../config.php"; echo $$server;')
+PREFIX ?= .product
 
 ifeq ($(shell uname),Darwin)
 
@@ -15,37 +16,37 @@ USERNAME   ?= $(shell id -nu)
 export BUNDLE_ID DESTDIR ENDPOINT SECRET SERVER USERNAME
 
 TOPLEVEL = \
-	$(DESTDIR)/SSHProxy.bundle/Contents/Info.plist
+	$(PREFIX)/SSHProxy.bundle/Contents/Info.plist
 BINARIES = \
-	$(DESTDIR)/SSHProxy.bundle/Contents/MacOS/ssh-connect \
-	$(DESTDIR)/SSHProxy.bundle/Contents/MacOS/ssh-forward
+	$(PREFIX)/SSHProxy.bundle/Contents/MacOS/ssh-connect \
+	$(PREFIX)/SSHProxy.bundle/Contents/MacOS/ssh-forward
 RESOURCES = \
-	$(DESTDIR)/SSHProxy.bundle/Contents/Resources/ssh_config
+	$(PREFIX)/SSHProxy.bundle/Contents/Resources/ssh_config \
+	$(PREFIX)/SSHProxy.bundle/Contents/Resources/$(BUNDLE_ID).plist
 
-all: $(TOPLEVEL) $(BINARIES) $(RESOURCES) \
-	$(DESTDIR)/SSHProxy.bundle/Contents/Resources/$(BUNDLE_ID).plist \
-	$(DESTDIR)/SSHProxy.bundle/Contents/_CodeSignature/CodeResources
+.INTERMEDIATE: resources/$(BUNDLE_ID).plist
 
-$(DESTDIR)/SSHProxy.bundle/Contents/Resources/$(BUNDLE_ID).plist: resources/launchd.plist resources/Info.plist ../config.php
-	mkdir -p $(@D)
-	eval "`echo "cat << EOF\n$$(cat $<)\nEOF"`" > $@
+all: $(TOPLEVEL) $(BINARIES) $(RESOURCES)
 
-$(DESTDIR)/SSHProxy.bundle/Contents/_CodeSignature/CodeResources: $(TOPLEVEL) $(BINARIES) $(RESOURCES)
+install:
+	$(MAKE) PREFIX=$(DESTDIR) all
 	codesign -f --deep -s "$(SIGNING_ID)" -i $(BUNDLE_ID) -o kill,hard,runtime $(DESTDIR)/SSHProxy.bundle
+
+resources/$(BUNDLE_ID).plist: resources/launchd.plist resources/Info.plist ../config.php
+	eval "`echo "cat << EOF\n$$(cat $<)\nEOF"`" > $@
 
 log:
 	@log stream --predicate '(process BEGINSWITH "ssh") OR (eventMessage CONTAINS "ssh")'
 
 else
 
-DESTDIR  ?= .install
 ENDPOINT ?= $(shell hostname)
 
 BINARIES = \
-	$(DESTDIR)/bin/ssh-connect \
-	$(DESTDIR)/bin/ssh-forward
+	$(PREFIX)/bin/ssh-connect \
+	$(PREFIX)/bin/ssh-forward
 RESOURCES = \
-	$(DESTDIR)/share/ssh-proxy/ssh_config
+	$(PREFIX)/share/ssh-proxy/ssh_config
 
 all: $(BINARIES) $(RESOURCES)
 
@@ -63,7 +64,7 @@ $(BINARIES): $(call dirname,$(BINARIES))/%: .build/release/%
 $(RESOURCES): $(call dirname,$(RESOURCES))/%: resources/%
 	mkdir -p $(@D) && cp $< $@ && chmod 644 $@
 
-.build/release/ssh-connect .build/release/ssh-forward: .build/release/ssh-%: %/main.swift $(wildcard *.c *.h *.swift)
+.build/release/ssh-connect .build/release/ssh-forward: .build/release/ssh-%: %/main.swift $(wildcard common/*)
 	rm -f $@
 	swift build --product $(@F) --configuration release
 
@@ -71,7 +72,4 @@ connect forward: all
 	$(call dirname,$(BINARIES))/ssh-$@ --endpoint $(ENDPOINT) --key $(SECRET) --url $(SERVER)
 
 clean:
-	rm -rf .build .install Package.resolved
-
-cleanall: clean
-	rm -rf $(DESTDIR)/SSHProxy.bundle
+	rm -rf .build $(PREFIX) Package.resolved
