@@ -11,7 +11,7 @@ let package = Package(
 		.executable(name: "ssh-forward", targets: ["Forward"])
 	],
 	dependencies: [
-		.package(name: "swift-crypto", url: "https://github.com/apple/swift-crypto.git", from: "1.0.0")
+		.package(url: "https://github.com/apple/swift-crypto.git", from: "1.0.0")
 	],
 	targets: [
 		.target(name: "Connect", dependencies: ["SSHProxy"], path: "connect"),
