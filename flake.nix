@@ -1,7 +1,7 @@
 {
 	description = "connect machines over SSH using Amazon EC2 VMs";
 	inputs.swift-crypto = {
-		url = github:apple/swift-crypto;
+		url = "github:apple/swift-crypto";
 		flake = false;
 	};
 	outputs = { self, nixpkgs, swift-crypto }:
