@@ -17,7 +17,24 @@
     "root": {
       "inputs": {
         "nixpkgs": "nixpkgs",
+        "swift-argument-parser": "swift-argument-parser",
         "swift-crypto": "swift-crypto"
+      }
+    },
+    "swift-argument-parser": {
+      "flake": false,
+      "locked": {
+        "lastModified": 1615237241,
+        "narHash": "sha256-TPNE5lDXlr70QejQvZZ94X99+NZ+YIHn+/PCsb1aCjw=",
+        "owner": "apple",
+        "repo": "swift-argument-parser",
+        "rev": "831ed5e860a70e745bc1337830af4786b2576881",
+        "type": "github"
+      },
+      "original": {
+        "owner": "apple",
+        "repo": "swift-argument-parser",
+        "type": "github"
       }
     },
     "swift-crypto": {

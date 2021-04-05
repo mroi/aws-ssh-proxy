@@ -1,10 +1,14 @@
 {
 	description = "connect machines over SSH using Amazon EC2 VMs";
+	inputs.swift-argument-parser = {
+		url = "github:apple/swift-argument-parser";
+		flake = false;
+	};
 	inputs.swift-crypto = {
 		url = "github:apple/swift-crypto";
 		flake = false;
 	};
-	outputs = { self, nixpkgs, swift-crypto }:
+	outputs = { self, nixpkgs, swift-argument-parser, swift-crypto }:
 		let
 			ssh-proxy = system: with import nixpkgs {
 				inherit system;
@@ -33,6 +37,7 @@
 						xcbuild
 					];
 				patchPhase = ''
+					substituteInPlace proxy/Package.swift --replace 'url: "https://github.com/apple/swift-argument-parser.git"' 'path: "${swift-argument-parser}") //'
 					substituteInPlace proxy/Package.swift --replace 'url: "https://github.com/apple/swift-crypto.git"' 'path: "${swift-crypto}") //'
 					substituteInPlace proxy/common/proxy.swift --replace /usr/bin/ssh ${openssh}/bin/ssh
 				'';
