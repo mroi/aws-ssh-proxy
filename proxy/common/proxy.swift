@@ -74,7 +74,7 @@ public enum ProxyMode: String {
 	case forward = "SSH_PROXY_FORWARD"
 }
 
-public func parseArguments() throws -> (endpoint: String, key: Data, url: URL) {
+public func parseArguments() throws -> (endpoint: String, key: SecureData, url: URL) {
 	let arguments = CommandLine.arguments.dropFirst()
 	var iterator = arguments.makeIterator()
 
@@ -111,7 +111,7 @@ public func parseArguments() throws -> (endpoint: String, key: Data, url: URL) {
 	guard let _ = endpoint.data(using: .ascii) else {
 		throw ArgumentError.invalid(endpoint)
 	}
-	guard let keyData = key.data(using: .utf8) else {
+	guard let keyData = SecureData(string: key) else {
 		throw ArgumentError.invalid(key)
 	}
 	guard let url = URL(string: urlSanitized) else {
@@ -126,20 +126,52 @@ public func parseArguments() throws -> (endpoint: String, key: Data, url: URL) {
 
 import Crypto
 
-extension Data {
+/// stores byte data that gets zeroed whenever the instance is deallocated
+public class SecureData {
+	public typealias Buffer = UnsafeMutableBufferPointer<UInt8>
+	private var buffer: Buffer
+	public init?(string: String) {
+		assert(string.isContiguousUTF8)  // make sure we do not create temp copies
+		buffer = Buffer.allocate(capacity: string.lengthOfBytes(using: .utf8))
+		let copied = string.utf8.withContiguousStorageIfAvailable {
+			$0.copyBytes(to: buffer)
+		}
+		assert(copied == buffer.count)
+	}
 	public init(randomBytes: Int) {
 		let nonce = AES.GCM.Nonce()
-		assert(nonce.underestimatedCount >= randomBytes)
-		self = Data(nonce.prefix(randomBytes))
+		buffer = Buffer.allocate(capacity: randomBytes)
+		let copied = nonce.withUnsafeBytes {
+			$0.copyBytes(to: buffer)
+		}
+		assert(copied == buffer.count)
+		assert(copied == randomBytes)
 	}
-	public func hmac(key: Data) -> Data {
+	deinit {
+		// zero the contents of the buffer
+		memset_s(buffer.baseAddress, buffer.count, 0, buffer.count)
+		buffer.deallocate()
+	}
+}
+
+extension SecureData: Sequence, ContiguousBytes {
+	public func makeIterator() -> Buffer.Iterator {
+		return buffer.makeIterator()
+	}
+	public func withUnsafeBytes<R>(_ body: (UnsafeRawBufferPointer) throws -> R) rethrows -> R {
+		return try buffer.withUnsafeBytes(body)
+	}
+}
+
+extension Data {
+	public func hmac(key: SecureData) -> Data {
 		let mac = HMAC<SHA256>.authenticationCode(for: self, using: SymmetricKey(data: key))
 		return Data(mac)
 	}
 }
 
 extension StringProtocol where Index == String.Index {
-	public func token(key: Data, nonce: Data) -> String? {
+	public func token(key: SecureData, nonce: SecureData) -> String? {
 		guard let data = data(using: .ascii) else { return nil }
 		let hmac = (nonce + data).hmac(key: key)
 		return (nonce + hmac).base64EncodedString()

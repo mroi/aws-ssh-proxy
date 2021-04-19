@@ -8,7 +8,7 @@ do {
 	let arguments = try parseArguments()
 
 	// generate URL with authentication token
-	let nonce = Data(randomBytes: 10)
+	let nonce = SecureData(randomBytes: 10)
 	let query = "launch?\(arguments.endpoint)"
 	let token = query.token(key: arguments.key, nonce: nonce)!
 	let url = URL(string: "\(query)&\(token)", relativeTo: arguments.url)!
