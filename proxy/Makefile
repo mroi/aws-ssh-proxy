@@ -3,6 +3,7 @@
 SECRET ?= $(shell php -r 'include "../config.php"; echo $$secret;')
 SERVER ?= $(shell php -r 'include "../config.php"; echo $$server;')
 PREFIX ?= .product
+CONFIG ?= release
 
 ifeq ($(shell uname),Darwin)
 
@@ -58,15 +59,15 @@ dirname = $(sort $(patsubst %/,%,$(dir $(1))))
 $(TOPLEVEL): $(call dirname,$(TOPLEVEL))/%: resources/%
 	mkdir -p $(@D) && cp $< $@ && chmod 644 $@
 
-$(BINARIES): $(call dirname,$(BINARIES))/%: .build/release/%
+$(BINARIES): $(call dirname,$(BINARIES))/%: .build/$(CONFIG)/%
 	mkdir -p $(@D) && cp $< $@ && chmod 755 $@
 
 $(RESOURCES): $(call dirname,$(RESOURCES))/%: resources/%
 	mkdir -p $(@D) && cp $< $@ && chmod 644 $@
 
-.build/release/ssh-connect .build/release/ssh-forward: .build/release/ssh-%: %/main.swift $(wildcard common/*)
+.build/$(CONFIG)/ssh-connect .build/$(CONFIG)/ssh-forward: .build/$(CONFIG)/ssh-%: %/main.swift $(wildcard common/*)
 	rm -f $@
-	swift build --product $(@F) --configuration release
+	swift build --product $(@F) --configuration $(CONFIG)
 	$(MAKE) .check
 
 # check downloaded packages against known-good versions
