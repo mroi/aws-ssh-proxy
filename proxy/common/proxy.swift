@@ -111,14 +111,11 @@ public func parseArguments() throws -> (endpoint: String, key: SecureData, url: 
 	guard let _ = endpoint.data(using: .ascii) else {
 		throw ArgumentError.invalid(endpoint)
 	}
-	guard let keyData = SecureData(string: key) else {
-		throw ArgumentError.invalid(key)
-	}
 	guard let url = URL(string: urlSanitized) else {
 		throw ArgumentError.invalid(urlSanitized)
 	}
 
-	return (endpoint, keyData, url)
+	return (endpoint, SecureData(string: key), url)
 }
 
 
@@ -130,7 +127,7 @@ import Crypto
 public class SecureData {
 	public typealias Buffer = UnsafeMutableBufferPointer<UInt8>
 	private var buffer: Buffer
-	public init?(string: String) {
+	public init(string: String) {
 		assert(string.isContiguousUTF8)  // make sure we do not create temp copies
 		buffer = Buffer.allocate(capacity: string.lengthOfBytes(using: .utf8))
 		let copied = string.utf8.withContiguousStorageIfAvailable {
