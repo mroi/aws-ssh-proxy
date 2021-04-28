@@ -1,4 +1,4 @@
-// swift-tools-version:5.3
+// swift-tools-version:5.4
 import PackageDescription
 
 let package = Package(
@@ -14,8 +14,8 @@ let package = Package(
 		.package(url: "https://github.com/apple/swift-crypto.git", from: "1.0.0")
 	],
 	targets: [
-		.target(name: "Connect", dependencies: ["SSHProxy"], path: "connect"),
-		.target(name: "Forward", dependencies: ["SSHProxy"], path: "forward"),
+		.executableTarget(name: "Connect", dependencies: ["SSHProxy"], path: "connect"),
+		.executableTarget(name: "Forward", dependencies: ["SSHProxy"], path: "forward"),
 		.target(name: "SSHProxy", dependencies: ["Sandbox",
 			.product(name: "Crypto", package: "swift-crypto")
 		], path: "common", exclude: ["sandbox.c"], sources: ["proxy.swift"]),
