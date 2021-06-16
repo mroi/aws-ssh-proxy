@@ -75,7 +75,7 @@ $(RESOURCES): $(call dirname,$(RESOURCES))/%: resources/%
 ifneq ($(shell which nix),)
 	@for pkg in $? ; do \
 		test -d $$pkg/.git && mv $$pkg/.git .build/ ; \
-		hash=$$(nix hash-path $$pkg) ; \
+		hash=$$(nix hash path $$pkg) ; \
 		if ! grep -qF "$$hash" ../flake.lock ; then \
 			echo "$$pkg is not a known-good version" ; \
 			exit 1 ; \
