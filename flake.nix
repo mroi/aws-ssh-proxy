@@ -44,7 +44,7 @@
 				makeFlags = [ "-C" "proxy" "DESTDIR=$(out)" "ENDPOINT=" "SECRET=" "SERVER=" "USERNAME=" ];
 			};
 		in {
-			defaultPackage.x86_64-darwin = ssh-proxy "x86_64-darwin";
-			defaultPackage.x86_64-linux = ssh-proxy "x86_64-linux";
+			packages.x86_64-darwin.default = ssh-proxy "x86_64-darwin";
+			packages.x86_64-linux.default = ssh-proxy "x86_64-linux";
 		};
 }
