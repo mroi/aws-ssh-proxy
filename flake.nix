@@ -33,12 +33,14 @@
 				nativeBuildInputs =
 					lib.optional clangStdenv.isLinux swift ++
 					lib.optionals clangStdenv.isDarwin [
-						(xcodeenv.composeXcodeWrapper { version = "12.4"; })
+						(xcodeenv.composeXcodeWrapper { version = "13.2.1"; })
 						xcbuild
 					];
 				patchPhase = ''
-					substituteInPlace proxy/Package.swift --replace 'url: "https://github.com/apple/swift-argument-parser.git"' 'path: "${swift-argument-parser}") //'
-					substituteInPlace proxy/Package.swift --replace 'url: "https://github.com/apple/swift-crypto.git"' 'path: "${swift-crypto}") //'
+					ln -s ${swift-argument-parser} swift-argument-parser
+					ln -s ${swift-crypto} swift-crypto
+					substituteInPlace proxy/Package.swift --replace 'url: "https://github.com/apple/swift-argument-parser.git"' 'path: "../swift-argument-parser"), //'
+					substituteInPlace proxy/Package.swift --replace 'url: "https://github.com/apple/swift-crypto.git"' 'path: "../swift-crypto"), //'
 					substituteInPlace proxy/common/proxy.swift --replace /usr/bin/ssh ${openssh}/bin/ssh
 				'';
 				makeFlags = [ "-C" "proxy" "DESTDIR=$(out)" "ENDPOINT=" "SECRET=" "SERVER=" "USERNAME=" ];
