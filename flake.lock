@@ -24,11 +24,11 @@
     "swift-argument-parser": {
       "flake": false,
       "locked": {
-        "lastModified": 1646700034,
-        "narHash": "sha256-CY2eOjRPlaiPv52tCArWkh8YRj7S8ZmKLaNqP8e7E8s=",
+        "lastModified": 1643696315,
+        "narHash": "sha256-vNqkuAwSZNCWvwe6E5BqbXQdIbmIia0dENmmSQ9P8Mo=",
         "owner": "apple",
         "repo": "swift-argument-parser",
-        "rev": "c959b3a5d2e301c934c74d3fbb176bd717bfaf5f",
+        "rev": "e394bf350e38cb100b6bc4172834770ede1b7232",
         "type": "github"
       },
       "original": {
@@ -40,11 +40,11 @@
     "swift-crypto": {
       "flake": false,
       "locked": {
-        "lastModified": 1645811188,
-        "narHash": "sha256-EpNtEV2grmmG+zSHqsoPciBP2o/xF7xyKAFrAdR8qYc=",
+        "lastModified": 1645811460,
+        "narHash": "sha256-Iwz7JWhJIYbg7JSqIOOx2kRAfirwtZKLUWcKrQlGCwg=",
         "owner": "apple",
         "repo": "swift-crypto",
-        "rev": "facc82fbb465e8e308ceeeeb2bdd2830ae8023b3",
+        "rev": "ddb07e896a2a8af79512543b1c7eb9797f8898a5",
         "type": "github"
       },
       "original": {
