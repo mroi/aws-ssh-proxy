@@ -45,8 +45,18 @@
 				'';
 				makeFlags = [ "-C" "proxy" "DESTDIR=$(out)" "ENDPOINT=" "SECRET=" "SERVER=" "USERNAME=" ];
 			};
+
+			shell = system: with import nixpkgs { inherit system; };
+			mkShellNoCC {
+				packages = [ php ] ++
+					lib.optionals stdenv.isLinux [ swift binutils openssh ];
+				shellHook = "test -r ~/.shellrc && . ~/.shellrc";
+			};
+
 		in {
 			packages.x86_64-darwin.default = ssh-proxy "x86_64-darwin";
 			packages.x86_64-linux.default = ssh-proxy "x86_64-linux";
+			devShells.x86_64-darwin.default = shell "x86_64-darwin";
+			devShells.x86_64-linux.default = shell "x86_64-darwin";
 		};
 }

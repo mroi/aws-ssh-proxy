@@ -5,6 +5,11 @@ SERVER ?= $(shell php -r 'include "../config.php"; echo $$server;')
 PREFIX ?= .product
 CONFIG ?= release
 
+ifneq ($(shell which nix),)
+# use Nix package manager
+SHELL = nix develop --quiet --no-update-lock-file .. --command /bin/sh
+endif
+
 ifeq ($(shell uname),Darwin)
 
 BUNDLE_ID   = $(shell PlistBuddy -c 'Print CFBundleIdentifier' resources/Info.plist | tr -d '"')
