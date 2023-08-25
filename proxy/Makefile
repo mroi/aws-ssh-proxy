@@ -7,7 +7,7 @@ CONFIG ?= release
 
 ifneq ($(shell which nix),)
 # use Nix package manager
-SHELL = nix develop --quiet --no-update-lock-file .. --command /bin/sh
+SHELL = nix develop --quiet --no-update-lock-file --no-warn-dirty .. --command /bin/sh
 endif
 
 ifeq ($(shell uname),Darwin)
