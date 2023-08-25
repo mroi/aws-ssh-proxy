@@ -33,7 +33,7 @@
 				nativeBuildInputs =
 					lib.optional clangStdenv.isLinux swift ++
 					lib.optionals clangStdenv.isDarwin [
-						(xcodeenv.composeXcodeWrapper { version = "13.2.1"; })
+						(xcodeenv.composeXcodeWrapper { version = "14.2.1"; })
 						xcbuild
 					];
 				patchPhase = ''
