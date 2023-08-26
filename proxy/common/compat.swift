@@ -76,16 +76,16 @@ public class NSBackgroundActivityScheduler {
 /* MARK: Logging */
 
 #if os(macOS)
-@_exported import os
-#elseif os(Linux)
-public struct Logger {
-	public init() {}
-	public func error(_ message: String) { print(message) }
+import os
+extension RemoteVM {
+	public static func log(_ error: Error) {
+		Logger().error("\(String(reflecting: error), privacy: .public)")
+	}
 }
-public extension DefaultStringInterpolation {
-	enum Privacy { case `public` }
-	mutating func appendInterpolation(_ text: String, privacy: Privacy) {
-		appendInterpolation(privacy == .public ? text : "<private>")
+#elseif os(Linux)
+extension RemoteVM {
+	public static func log(_ error: Error) {
+		print(String(reflecting: error))
 	}
 }
 #endif

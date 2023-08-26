@@ -52,71 +52,65 @@ extension RemoteVM {
 	}
 
 	/// Requests the web service API to return the status of a remote VM.
-	public func status(_ continuation: @escaping (Substring?) throws -> Void) {
+	public func status() async -> Result<String?, Error> {
 		let (url, nonce) = authenticatedUrl(forCommand: "status")
 
-		request(url) { result in
-			do {
-				switch result {
-				case .nothing:
-					break
+		let result = await request(url)
 
-				case .proxy(let ip, let token):
-					guard let expectedToken = ip.authenticate(key: apiKey, nonce: nonce) else {
-						throw RequestError.invalidResponse(String(ip))
-					}
-					guard expectedToken == token else {
-						throw RequestError.unauthorized(ip, token)
-					}
-					try continuation(ip)
-					return
+		switch result {
+		case .nothing:
+			return .success(nil)
 
-				case .error(let error):
-					throw error
-				}
-			} catch {
-				Logger().error("\(String(reflecting: error), privacy: .public)")
+		case .proxy(let ip, let token):
+			guard let expectedToken = ip.authenticate(key: apiKey, nonce: nonce) else {
+				return .failure(RequestError.invalidResponse(String(ip)))
 			}
-			try! continuation(nil)
-		}
+			guard expectedToken == token else {
+				return .failure(RequestError.unauthorized(ip, token))
+			}
+			return .success(String(ip))
 
+		case .error(let error):
+			return .failure(error)
+		}
 	}
 
 	/// Requests the web service API to launch a remote VM.
-	public func launch(_ continuation: @escaping (Substring?) throws -> Void) {
+	public func launch() async -> Result<String, Error> {
 		let (url, nonce) = authenticatedUrl(forCommand: "launch")
 
-		request(url, method: "POST") { result in
-			do {
-				switch result {
-				case .nothing:
-					break
+		let result = await request(url, method: "POST")
 
-				case .proxy(let ip, let token):
-					guard let expectedToken = ip.authenticate(key: apiKey, nonce: nonce) else {
-						throw RequestError.invalidResponse(String(ip))
-					}
-					guard expectedToken == token else {
-						throw RequestError.unauthorized(ip, token)
-					}
-					try continuation(ip)
-					return
+		switch result {
+		case .nothing:
+			return .failure(RequestError.invalidResponse(""))
 
-				case .error(let error):
-					throw error
-				}
-			} catch {
-				RemoteVM.exit(withError: error)
+		case .proxy(let ip, let token):
+			guard let expectedToken = ip.authenticate(key: apiKey, nonce: nonce) else {
+				return .failure(RequestError.invalidResponse(String(ip)))
 			}
-			try! continuation(nil)
+			guard expectedToken == token else {
+				return .failure(RequestError.unauthorized(ip, token))
+			}
+			return .success(String(ip))
+
+		case .error(let error):
+			return .failure(error)
 		}
 	}
 
-	public func terminate(_ continuation: @escaping () -> Void) {
+	public func terminate() async -> Result<Void, Error> {
 		let (url, _) = authenticatedUrl(forCommand: "terminate")
 
-		request(url, method: "POST") { _ in
-			continuation()
+		let result = await request(url, method: "POST")
+
+		switch result {
+		case .nothing:
+			return .success(())
+		case .proxy(let ip, let token):
+			return .failure(RequestError.invalidResponse("\(ip) \(token)"))
+		case .error(let error):
+			return .failure(error)
 		}
 	}
 }
@@ -124,23 +118,23 @@ extension RemoteVM {
 
 /* MARK: HTTP Requests */
 
-public enum RequestError: Error {
-	case clientError(_: String)
-	case serverError(_: String)
-	case invalidResponse(_: String)
-	case unauthorized(_: Substring, _: Substring)
-	case noHTTPResponse
-	case noResponse
-}
-
-public enum RequestResult {
+enum RequestResult {
 	case nothing
 	case proxy(ip: Substring, token: Substring)
 	case error(_: RequestError)
 }
 
-public func request(_ url: URL, method: String = "GET", done: @escaping (RequestResult) -> Void) -> Void {
-	struct URLSessionStore {
+enum RequestError: Error {
+	case clientError(_: String)
+	case serverError(_: String)
+	case invalidResponse(_: String)
+	case unauthorized(_: Substring, _: Substring)
+	case noHTTPResponse
+	case noResponseBody
+}
+
+func request(_ url: URL, method: String = "GET") async -> RequestResult {
+	enum URLSessionStore {
 		static let session: URLSession = {
 #if os(Linux)
 			let config = URLSessionConfiguration.default
@@ -157,34 +151,30 @@ public func request(_ url: URL, method: String = "GET", done: @escaping (Request
 	var request = URLRequest(url: url)
 	request.httpMethod = method
 
-	let task = URLSessionStore.session.dataTask(with: request) { data, response, error in
-		guard error == nil else {
-			done(.error(.clientError(error!.localizedDescription)))
-			return
-		}
+	do {
+		let (data, response) = try await URLSessionStore.session.data(for: request)
 		guard let httpResponse = response as? HTTPURLResponse else {
-			done(.error(.noHTTPResponse))
-			return
+			return .error(.noHTTPResponse)
 		}
 		guard (200...299).contains(httpResponse.statusCode) else {
-			done(.error(.serverError(String(httpResponse.statusCode))))
-			return
+			return .error(.serverError(httpResponse.description))
 		}
-		guard let data = data, let response = String(data: data, encoding: .utf8) else {
-			done(.error(.noResponse))
-			return
+		guard let responseBody = String(data: data, encoding: .utf8) else {
+			return .error(.noResponseBody)
 		}
 
-		let trimmed = response.trimmingCharacters(in: .newlines)
+		let trimmed = responseBody.trimmingCharacters(in: .newlines)
 		let pieces = trimmed.split(separator: " ", maxSplits: 1)
+
 		switch pieces.count {
 		case 0:
-			done(.nothing)
+			return .nothing
 		case 2:
-			done(.proxy(ip: pieces[0], token: pieces[1]))
+			return .proxy(ip: pieces[0], token: pieces[1])
 		default:
-			done(.error(.invalidResponse(response)))
+			return .error(.invalidResponse(responseBody))
 		}
+	} catch {
+		return .error(.clientError(error.localizedDescription))
 	}
-	task.resume()
 }

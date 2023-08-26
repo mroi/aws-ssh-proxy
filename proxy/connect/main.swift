@@ -1,15 +1,16 @@
-import Foundation
 import RemoteVM
 
 sandbox()
 
 let remote = RemoteVM.parseOrExit()
 
-remote.launch { ip in
-	guard let ip else { return }
-	try ssh(mode: .connect, to: ip) { ssh in
-		exit(ssh.terminationStatus)
-	}
-}
+switch await remote.launch() {
 
-RunLoop.main.run()
+case .success(let ip):
+	try ssh(mode: .connect, to: ip) { _ in
+		RemoteVM.exit()
+	}
+
+case .failure(let error):
+	RemoteVM.exit(withError: error)
+}

@@ -5,28 +5,35 @@ sandbox()
 
 let remote = RemoteVM.parseOrExit()
 
-do {
-	// schedule background activity
-	guard let bundleId = ProxyBundle.bundleIdentifier else {
-		throw InternalError.noBundleId
-	}
-	let activity = NSBackgroundActivityScheduler(identifier: bundleId)
-	activity.interval = 5 * 60
-	activity.repeats = true
-	activity.qualityOfService = .utility
-	activity.schedule { done in
-		remote.status { ip in
-			guard let ip else { done(.finished) ; return }
+// schedule background activity
+guard let bundleId = ProxyBundle.bundleIdentifier else {
+	RemoteVM.exit(withError: InternalError.noBundleId)
+}
+let activity = NSBackgroundActivityScheduler(identifier: bundleId)
+activity.interval = 5 * 60
+activity.repeats = true
+activity.qualityOfService = .utility
+activity.schedule { done in
+
+	Task {
+		switch await remote.status() {
+
+		case .success(.none):
+			break
+		case .success(.some(let ip)):
 			try ssh(mode: .forward, to: ip) { _ in
-				remote.terminate {
+				Task {
+					let _ = await remote.terminate()
 					done(.finished)
 				}
 			}
-		}
-	}
+			return
 
-	RunLoop.main.run()
-} catch let error as InternalError {
-	print(error)
-	exit(EX_SOFTWARE)
+		case .failure(let error):
+			RemoteVM.log(error)
+		}
+		done(.finished)
+	}
 }
+
+RunLoop.main.run()
