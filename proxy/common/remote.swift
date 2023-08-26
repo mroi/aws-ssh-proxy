@@ -3,11 +3,115 @@ import Foundation
 import Sandbox
 
 
-/* MARK: Types and Initialization */
-
+/// Enter a suitable sandbox.
+///
+/// This must be called very early, since entering a sanbox late will fail.
 public func sandbox() -> Void {
 	FileManager.default.changeCurrentDirectoryPath(ProxyBundle.bundlePath)
 	sandbox(home: NSHomeDirectory(), bundlePath: ProxyBundle.bundlePath)
+}
+
+
+/* MARK: Remote VM Interaction */
+
+/// Parses command line arguments to interact with a remote VM.
+public struct RemoteVM: ParsableCommand {
+
+	public static var configuration = CommandConfiguration(commandName: CommandLine.arguments.first)
+
+	@Option var id: String
+	@Option var apiUrl: URL
+	@Option(transform: SecureData.init) var apiKey: SecureData
+
+	public init() {}
+}
+
+extension URL: ExpressibleByArgument {
+	public init?(argument: String) {
+		guard let url = URL.init(string: argument) else { return nil }
+		self = url
+	}
+}
+
+extension RemoteVM {
+
+	private func authenticatedUrl(forCommand command: String) -> (url: URL, nonce: SecureData) {
+		let nonce = SecureData(randomBytes: 10)
+		let query = "\(command)?\(id)"
+		let token = query.authenticate(key: apiKey, nonce: nonce)!
+		let url = URL(string: "\(query)&\(token)", relativeTo: apiUrl)!
+
+		return (url, nonce)
+	}
+
+	/// Requests the web service API to return the status of a remote VM.
+	public func status(_ continuation: @escaping (Substring?) throws -> Void) {
+		let (url, nonce) = authenticatedUrl(forCommand: "status")
+
+		request(url) { result in
+			do {
+				switch result {
+				case .nothing:
+					break
+
+				case .proxy(let ip, let token):
+					guard let expectedToken = ip.authenticate(key: apiKey, nonce: nonce) else {
+						throw RequestError.invalidResponse(String(ip))
+					}
+					guard expectedToken == token else {
+						throw RequestError.unauthorized(ip, token)
+					}
+					try continuation(ip)
+					return
+
+				case .error(let error):
+					throw error
+				}
+			} catch {
+				Logger().error("\(String(reflecting: error), privacy: .public)")
+			}
+			try! continuation(nil)
+		}
+
+	}
+
+	/// Requests the web service API to launch a remote VM.
+	public func launch(_ continuation: @escaping (Substring?) throws -> Void) {
+		let (url, nonce) = authenticatedUrl(forCommand: "launch")
+
+		request(url, method: "POST") { result in
+			do {
+				switch result {
+				case .nothing:
+					break
+
+				case .proxy(let ip, let token):
+					guard let expectedToken = ip.authenticate(key: apiKey, nonce: nonce) else {
+						throw RequestError.invalidResponse(String(ip))
+					}
+					guard expectedToken == token else {
+						throw RequestError.unauthorized(ip, token)
+					}
+					try continuation(ip)
+					return
+
+				case .error(let error):
+					throw error
+				}
+			} catch {
+				RemoteVM.exit(withError: error)
+			}
+			try! continuation(nil)
+		}
+	}
+
+	public func terminate(_ continuation: @escaping () -> Void) {
+		let (url, _) = authenticatedUrl(forCommand: "terminate")
+
+		request(url, method: "POST") { _ in
+			continuation()
+		}
+	}
 }
 
 public struct ProxyBundle {
@@ -44,12 +148,6 @@ public struct ProxyBundle {
   #endif
 }
 
-public enum ArgumentError: Error {
-	case unknown(_: String)
-	case missing(_: String)
-	case invalid(_: String)
-}
-
 public enum InternalError: Error {
 	case noBundleId
 	case noSSHConfig
@@ -75,60 +173,16 @@ public enum ProxyMode: String {
 	case forward = "SSH_PROXY_FORWARD"
 }
 
-public func parseArguments() throws -> (endpoint: String, key: SecureData, url: URL) {
-	let arguments = CommandLine.arguments.dropFirst()
-	var iterator = arguments.makeIterator()
-
-	var endpointArgument: String?
-	var keyArgument: String?
-	var urlArgument: String?
-
-	while let argument = iterator.next() {
-		switch argument {
-		case "--id":
-			endpointArgument = iterator.next()
-		case "--api-key":
-			keyArgument = iterator.next()
-		case "--api-url":
-			urlArgument = iterator.next()
-		default:
-			throw ArgumentError.unknown(argument)
-		}
-	}
-
-	guard let endpoint = endpointArgument else {
-		throw ArgumentError.missing("--id")
-	}
-	guard let key = keyArgument else {
-		throw ArgumentError.missing("--api-key")
-	}
-	guard var urlSanitized = urlArgument else {
-		throw ArgumentError.missing("--api-url")
-	}
-	while urlSanitized.hasSuffix("/") {
-		urlSanitized = String(urlSanitized.dropLast())
-	}
-
-	guard let _ = endpoint.data(using: .ascii) else {
-		throw ArgumentError.invalid(endpoint)
-	}
-	guard let url = URL(string: urlSanitized) else {
-		throw ArgumentError.invalid(urlSanitized)
-	}
-
-	return (endpoint, SecureData(string: key), url)
-}
-
 
 /* MARK: Cryptographic Operations */
 
 import Crypto
 
 /// stores byte data that gets zeroed whenever the instance is deallocated
-public class SecureData {
-	public typealias Buffer = UnsafeMutableBufferPointer<UInt8>
+class SecureData {
+	typealias Buffer = UnsafeMutableBufferPointer<UInt8>
 	private var buffer: Buffer
-	public init(string: String) {
+	init(string: String) {
 		assert(string.isContiguousUTF8)  // make sure we do not create temp copies
 		buffer = Buffer.allocate(capacity: string.lengthOfBytes(using: .utf8))
 		let copied = string.utf8.withContiguousStorageIfAvailable {
@@ -136,7 +190,7 @@ public class SecureData {
 		}
 		assert(copied == buffer.count)
 	}
-	public init(randomBytes: Int) {
+	init(randomBytes: Int) {
 		let nonce = AES.GCM.Nonce()
 		buffer = Buffer.allocate(capacity: randomBytes)
 		let copied = nonce.withUnsafeBytes {
@@ -162,14 +216,14 @@ extension SecureData: Sequence, ContiguousBytes {
 }
 
 extension Data {
-	public func hmac(key: SecureData) -> Data {
+	func hmac(key: SecureData) -> Data {
 		let mac = HMAC<SHA256>.authenticationCode(for: self, using: SymmetricKey(data: key))
 		return Data(mac)
 	}
 }
 
 extension StringProtocol where Index == String.Index {
-	public func token(key: SecureData, nonce: SecureData) -> String? {
+	func authenticate(key: SecureData, nonce: SecureData) -> String? {
 		guard let data = data(using: .ascii) else { return nil }
 		let hmac = (nonce + data).hmac(key: key)
 		return (nonce + hmac).base64EncodedString()
