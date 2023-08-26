@@ -20,7 +20,7 @@ let package = Package(
 		.target(name: "RemoteVM", dependencies: ["Sandbox",
 			.product(name: "ArgumentParser", package: "swift-argument-parser"),
 			.product(name: "Crypto", package: "swift-crypto")
-		], path: "common", exclude: ["sandbox.c"], sources: ["remote.swift"]),
-		.target(name: "Sandbox", path: "common", exclude: ["remote.swift"], sources: ["sandbox.c"], publicHeadersPath: ".")
+		], path: "common", exclude: ["sandbox.c"]),
+		.target(name: "Sandbox", path: "common", sources: ["sandbox.c"], publicHeadersPath: ".")
 	]
 )
