@@ -47,26 +47,26 @@ To install the web service, you need PHP-enabled web space. Follow these steps:
 3. Make sure your web server also has the credentials of the `ssh-proxy` IAM account stored 
    in its `~/.aws/credentials` file or wherever you keep your AWS credentials. Use a profile 
    name of `ssh-proxy`.
-4. The web service uses a pre-shared secret for request authentication. Store this secret 
-   and optionally any other configuration in `config.php`.
+4. The web service uses a pre-shared secret to authenticate its API requests. Store this 
+   API key and optionally any other configuration in `config.php`.
 
 An authentication token is formed by first generating a 10-byte random nonce. Then, a 
-SHA256-HMAC is calculated over the string `<nonce><command>?<endpoint>`. The result is 
+SHA256-HMAC is calculated over the string `<nonce><command>?<identifier>`. The result is 
 Base64-encoded and appended to the request URL.
 
-The web service understands three commands, all of which use an endpoint identifier as their 
-query string:
+The web service understands three commands, all of which use an identifier for the proxied 
+endpoint as their query string:
 
-**`/launch?<endpoint>&<token>`**  
+**`/launch?<identifier>&<token>`**  
 Starts a new SSH proxy for the given endpoint, waits until the proxy is running and returns 
 its IP address. When a proxy is already running, only the IP address is returned.
 
-**`/status?<endpoint>&<token>`**  
+**`/status?<identifier>&<token>`**  
 Returns the public IP address of the SSH proxy when such a proxy has been started for the 
 given endpoint. An authentication token similar to the one used for requests is generated to 
 verify the IP address. The same nonce is used to prevent replay attacks.
 
-**`/terminate?<endpoint>&<token>`**  
+**`/terminate?<identifier>&<token>`**  
 Terminates the running SSH proxy.
 
 Launch Daemon for Endpoint Machines
@@ -78,7 +78,7 @@ request and the daemon will forward its local SSH port to the VM.
 
 1. You install the launch daemon by invoking `make` in the 
    [`proxy`](https://github.com/mroi/aws-ssh-proxy/blob/master/proxy/) directory. You can 
-   override variables (`DESTDIR`, `SIGNING_ID`, …) to configure the installation.
+   override variables (`DESTDIR`, `SIGNING_NAME`, …) to configure the installation.
 2. Register the daemon with launchd by copying the included plist file from 
    `SSHProxy.bundle/Contents/Resources` to `/Library/LaunchDaemons/`. You may want to 
    customize the file if the defaults don’t suit your needs.
@@ -92,15 +92,15 @@ This can be automated and integrated into SSH by way of a proxy command. The bin
 directory. You can use it in your SSH configuration by way of the `ProxyCommand` directive. 
 It understands the same command line options as the daemon:
 
-**`--endpoint`**  
+**`--id`**  
 Specifies the name of the endpoint to connect to. Usage of `%h` in you SSH config is 
 practical.
 
-**`--key`**  
-The pre-shared secret to authenticate the connection.
+**`--api-url`**  
+The API URL where the PHP web service can be reached.
 
-**`--url`**  
-The URL where the PHP web service can be reached.
+**`--api-key`**  
+The pre-shared API key to authenticate web service requests.
 
 A useful SSH config file, which establishes a local connection when possible and connects 
 via proxy when necessary looks like this:
@@ -110,7 +110,7 @@ Match host <hostnames> exec "route get %h.local &> /dev/null"
 HostName %h.local
 
 Match host <hostnames>
-ProxyCommand /path/to/SSHProxy.bundle/Contents/MacOS/ssh-connect --endpoint %h --key <secret> --url <server>
+ProxyCommand /path/to/SSHProxy.bundle/Contents/MacOS/ssh-connect --id %h --api-url <server> --api-key <secret>
 ```
 
 You can also read the secret from a file using shell command substitution (`` `cat 

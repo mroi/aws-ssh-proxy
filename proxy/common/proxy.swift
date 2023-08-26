@@ -85,11 +85,11 @@ public func parseArguments() throws -> (endpoint: String, key: SecureData, url: 
 
 	while let argument = iterator.next() {
 		switch argument {
-		case "--endpoint":
+		case "--id":
 			endpointArgument = iterator.next()
-		case "--key":
+		case "--api-key":
 			keyArgument = iterator.next()
-		case "--url":
+		case "--api-url":
 			urlArgument = iterator.next()
 		default:
 			throw ArgumentError.unknown(argument)
@@ -97,13 +97,13 @@ public func parseArguments() throws -> (endpoint: String, key: SecureData, url: 
 	}
 
 	guard let endpoint = endpointArgument else {
-		throw ArgumentError.missing("--endpoint")
+		throw ArgumentError.missing("--id")
 	}
 	guard let key = keyArgument else {
-		throw ArgumentError.missing("--key")
+		throw ArgumentError.missing("--api-key")
 	}
 	guard var urlSanitized = urlArgument else {
-		throw ArgumentError.missing("--url")
+		throw ArgumentError.missing("--api-url")
 	}
 	while urlSanitized.hasSuffix("/") {
 		urlSanitized = String(urlSanitized.dropLast())

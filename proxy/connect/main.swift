@@ -44,7 +44,7 @@ do {
 	RunLoop.main.run()
 } catch let error as ArgumentError {
 	print(error)
-	print("Usage: ssh-connect --endpoint <name> --key <secret> --url <server>")
+	print("Usage: ssh-connect --id <name> --api-url <server> --api-key <secret>")
 	exit(EX_USAGE)
 } catch let error as InternalError {
 	print(error)

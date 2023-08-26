@@ -5,8 +5,8 @@ require('aws.phar');
 // extract request details
 $command = explode('?', $_SERVER['REQUEST_URI'])[0];
 $command = trim($command, '/');
-$endpoint = explode('&', $_SERVER['QUERY_STRING'])[0];
-$endpoint = preg_replace('/[^A-Za-z0-9-]/', '', $endpoint);
+$id = explode('&', $_SERVER['QUERY_STRING'])[0];
+$id = preg_replace('/[^A-Za-z0-9-]/', '', $id);
 $auth = explode('&', $_SERVER['QUERY_STRING'])[1] ?? '';
 $auth = base64_decode($auth);
 $nonce = substr($auth, 0, 10);
@@ -14,18 +14,18 @@ $hmac = substr($auth, 10);
 
 // you can override these variables in config.php
 $region = isset($region) ? $region : getenv('AWS_DEFAULT_REGION');
-$secret = isset($secret) ? $secret : exit();
+$apiKey = isset($apiKey) ? $apiKey : exit();
 $accept = isset($accept) ? $accept : array();
 
 header('Content-Type: text/plain');
 header('Cache-Control: no-store, no-cache, must-revalidate, max-age=0');
 
 // check request authentication
-if (!hash_equals($hmac, hash_hmac('sha256', $nonce . $command . '?' . $endpoint, $secret, true))) {
+if (!hash_equals($hmac, hash_hmac('sha256', $nonce . $command . '?' . $id, $apiKey, true))) {
 	header($_SERVER['SERVER_PROTOCOL'] . ' 401 Unauthorized');
 	exit();
 }
-if (!empty($accept) && !in_array($endpoint, $accept)) {
+if (!empty($accept) && !in_array($id, $accept)) {
 	header($_SERVER['SERVER_PROTOCOL'] . ' 403 Forbidden');
 	exit();
 }
@@ -41,7 +41,7 @@ try {
 		'Filters' => [
 			[
 				'Name' => 'tag:ssh-proxy',
-				'Values' => [$endpoint]
+				'Values' => [$id]
 			]
 		]
 	]);
@@ -86,7 +86,7 @@ try {
 						'Tags' => [
 							[
 								'Key' => 'ssh-proxy',
-								'Value' => $endpoint
+								'Value' => $id
 							]
 						]
 					]
@@ -113,7 +113,7 @@ try {
 		// print public IPs of running VMs
 		$ip = $result->search("Reservations[].Instances[?State.Name=='running'][].PublicIpAddress | [0]");
 		if ($ip) {
-			$auth = base64_encode($nonce . hash_hmac('sha256', $nonce . $ip, $secret, true));
+			$auth = base64_encode($nonce . hash_hmac('sha256', $nonce . $ip, $apiKey, true));
 			print("${ip} ${auth}\n");
 		}
 		break;

@@ -9,12 +9,12 @@
 	<key>ProgramArguments</key>
 	<array>
 		<string>${DESTDIR}/SSHProxy.bundle/Contents/MacOS/ssh-forward</string>
-		<string>--endpoint</string>
-		<string>${ENDPOINT}</string>
-		<string>--key</string>
-		<string>${SECRET}</string>
-		<string>--url</string>
-		<string>${SERVER}</string>
+		<string>--id</string>
+		<string>${LOCAL_ID}</string>
+		<string>--api-url</string>
+		<string>${API_URL}</string>
+		<string>--api-key</string>
+		<string>${API_KEY}</string>
 	</array>
 	<key>StartInterval</key>
 	<integer>300</integer>
