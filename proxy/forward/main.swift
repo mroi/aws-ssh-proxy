@@ -1,5 +1,5 @@
 import Foundation
-import SSHProxy
+import RemoteVM
 
 sandbox()
 

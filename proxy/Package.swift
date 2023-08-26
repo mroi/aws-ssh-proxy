@@ -15,12 +15,12 @@ let package = Package(
 		.package(url: "https://github.com/apple/swift-crypto.git", "1.0.0" ..< "3.0.0")
 	],
 	targets: [
-		.executableTarget(name: "Connect", dependencies: ["SSHProxy"], path: "connect"),
-		.executableTarget(name: "Forward", dependencies: ["SSHProxy"], path: "forward"),
-		.target(name: "SSHProxy", dependencies: ["Sandbox",
+		.executableTarget(name: "Connect", dependencies: ["RemoteVM"], path: "connect"),
+		.executableTarget(name: "Forward", dependencies: ["RemoteVM"], path: "forward"),
+		.target(name: "RemoteVM", dependencies: ["Sandbox",
 			.product(name: "ArgumentParser", package: "swift-argument-parser"),
 			.product(name: "Crypto", package: "swift-crypto")
-		], path: "common", exclude: ["sandbox.c"], sources: ["proxy.swift"]),
-		.target(name: "Sandbox", path: "common", exclude: ["proxy.swift"], sources: ["sandbox.c"], publicHeadersPath: ".")
+		], path: "common", exclude: ["sandbox.c"], sources: ["remote.swift"]),
+		.target(name: "Sandbox", path: "common", exclude: ["remote.swift"], sources: ["sandbox.c"], publicHeadersPath: ".")
 	]
 )

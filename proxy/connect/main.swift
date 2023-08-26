@@ -1,6 +1,6 @@
 import Foundation
 import Dispatch
-import SSHProxy
+import RemoteVM
 
 sandbox()
 
