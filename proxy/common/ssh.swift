@@ -11,7 +11,7 @@ public enum ProxyMode: String {
 	case forward = "SSH_PROXY_FORWARD"
 }
 
-public func ssh(mode: ProxyMode, to ip: String, _ done: @escaping (Process) -> Void) throws {
+public func ssh(mode: ProxyMode, to ip: String) async throws {
 	class SignalHandler {
 		static let shared = SignalHandler()
 		var subprocess: Process?
@@ -31,11 +31,14 @@ public func ssh(mode: ProxyMode, to ip: String, _ done: @escaping (Process) -> V
 		throw InternalError.noSSHConfig
 	}
 
-	let ssh = Process()
-	SignalHandler.shared.subprocess = ssh
-	ssh.executableURL = URL(fileURLWithPath: "/usr/bin/ssh")
-	ssh.arguments = ["-F", config, ip]
-	ssh.environment = [mode.rawValue: "1"]
-	ssh.terminationHandler = done
-	try ssh.run()
+	try await withCheckedThrowingContinuation { continuation in
+		let ssh = Process()
+		SignalHandler.shared.subprocess = ssh
+		ssh.executableURL = URL(fileURLWithPath: "/usr/bin/ssh")
+		ssh.arguments = ["-F", config, ip]
+		ssh.environment = [mode.rawValue: "1"]
+		ssh.terminationHandler = { _ in continuation.resume() }
+		do { try ssh.run() }
+		catch { continuation.resume(throwing: error) }
+	}
 }

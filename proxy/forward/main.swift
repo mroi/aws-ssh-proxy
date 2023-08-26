@@ -20,18 +20,16 @@ activity.schedule { done in
 
 		case .success(.none):
 			break
+
 		case .success(.some(let ip)):
-			try ssh(mode: .forward, to: ip) { _ in
-				Task {
-					let _ = await remote.terminate()
-					done(.finished)
-				}
-			}
-			return
+			do { try await ssh(mode: .forward, to: ip) }
+			catch { RemoteVM.log(error) }
+			let _ = await remote.terminate()
 
 		case .failure(let error):
 			RemoteVM.log(error)
 		}
+
 		done(.finished)
 	}
 }
