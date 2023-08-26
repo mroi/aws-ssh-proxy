@@ -5,9 +5,11 @@ API_KEY ?= $(shell php -r 'include "../config.php"; echo $$apiKey;')
 PREFIX  ?= .product
 CONFIG  ?= release
 
+ifeq ($(IN_NIX_SHELL),)
 ifneq ($(shell which nix),)
 # use Nix package manager
 SHELL = nix develop --quiet --no-update-lock-file --no-warn-dirty .. --command /bin/sh
+endif
 endif
 
 ifeq ($(shell uname),Darwin)
