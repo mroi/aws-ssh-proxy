@@ -3,7 +3,7 @@ import Foundation
 import Sandbox
 
 
-// MARK: - Types and Initialization
+/* MARK: Types and Initialization */
 
 public func sandbox() -> Void {
 	FileManager.default.changeCurrentDirectoryPath(ProxyBundle.bundlePath)
@@ -120,7 +120,7 @@ public func parseArguments() throws -> (endpoint: String, key: SecureData, url: 
 }
 
 
-// MARK: - Cryptography
+/* MARK: Cryptographic Operations */
 
 import Crypto
 
@@ -177,7 +177,7 @@ extension StringProtocol where Index == String.Index {
 }
 
 
-// MARK: - HTTP & SSH
+/* MARK: HTTP & SSH */
 
 #if os(Linux)
 import FoundationNetworking
@@ -263,7 +263,7 @@ public func ssh(mode: ProxyMode, to ip: Substring, _ done: @escaping (Process) -
 }
 
 
-// MARK: - Background Activity
+/* MARK: Background Activity */
 
 #if os(Linux)
 public class NSBackgroundActivityScheduler {
@@ -297,7 +297,7 @@ public class NSBackgroundActivityScheduler {
 #endif
 
 
-// MARK: - Logging
+/* MARK: Logging */
 
 #if os(macOS)
 @_exported import os
