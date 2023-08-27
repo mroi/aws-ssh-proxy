@@ -31,8 +31,9 @@
 				name = "ssh-proxy-${lib.substring 0 8 self.lastModifiedDate}";
 				src = self;
 				nativeBuildInputs =
-					lib.optional clangStdenv.isLinux swift ++
-					lib.optionals clangStdenv.isDarwin [
+					lib.optionals clangStdenv.isLinux [
+						swift swiftpm
+					] ++ lib.optionals clangStdenv.isDarwin [
 						(xcodeenv.composeXcodeWrapper { version = "14.2.1"; })
 						xcbuild
 					];
@@ -41,15 +42,16 @@
 					ln -s ${swift-crypto} swift-crypto
 					substituteInPlace proxy/Package.swift --replace 'url: "https://github.com/apple/swift-argument-parser.git"' 'path: "../swift-argument-parser"), //'
 					substituteInPlace proxy/Package.swift --replace 'url: "https://github.com/apple/swift-crypto.git"' 'path: "../swift-crypto"), //'
-					substituteInPlace proxy/common/proxy.swift --replace /usr/bin/ssh ${openssh}/bin/ssh
+					substituteInPlace proxy/common/ssh.swift --replace /usr/bin/ssh ${openssh}/bin/ssh
 				'';
-				makeFlags = [ "-C" "proxy" "DESTDIR=$(out)" "ENDPOINT=" "SECRET=" "SERVER=" "USERNAME=" ];
+				dontUseSwiftpmBuild = true;
+				makeFlags = [ "-C" "proxy" "PREFIX=$(out)" "LOCAL_ID=" "API_URL=" "API_KEY=" "USERNAME=" ];
 			};
 
 			shell = system: with import nixpkgs { inherit system; };
 			mkShellNoCC {
 				packages = [ php ] ++
-					lib.optionals stdenv.isLinux [ swift binutils openssh ];
+					lib.optionals stdenv.isLinux [ clang swift swiftpm openssh ];
 				shellHook = "test -r ~/.shellrc && . ~/.shellrc";
 			};
 
@@ -57,6 +59,6 @@
 			packages.x86_64-darwin.default = ssh-proxy "x86_64-darwin";
 			packages.x86_64-linux.default = ssh-proxy "x86_64-linux";
 			devShells.x86_64-darwin.default = shell "x86_64-darwin";
-			devShells.x86_64-linux.default = shell "x86_64-darwin";
+			devShells.x86_64-linux.default = shell "x86_64-linux";
 		};
 }
