@@ -101,11 +101,11 @@ try {
 
 		// wait until the instance is running
 		while ($instance) {
-			sleep(5);
 			$result = $ec2->describeInstances([
 				'InstanceIds' => [$instance]
 			]);
 			if (!empty($result->search("Reservations[].Instances[?State.Name=='running'][]"))) break;
+			sleep(5);
 		}
 		// fallthrough intended
 
