@@ -1,5 +1,10 @@
 import Foundation
+
+#if os(Linux)
+import FoundationNetworking
 import Dispatch
+import Glibc
+#endif
 
 
 /* MARK: Bundle Resources */
@@ -37,6 +42,35 @@ public struct ProxyBundle {
 	}
 #endif
 }
+
+
+/* MARK: Asynchronous HTTP */
+
+#if os(Linux)
+extension URLSession {
+	func data(for request: URLRequest) async throws -> (Data, URLResponse) {
+		try await withCheckedThrowingContinuation { continuation in
+			let task = dataTask(with: request) { data, response, error in
+				if let error {
+					continuation.resume(throwing: error)
+				} else {
+					continuation.resume(returning: (data!, response!))
+				}
+			}
+			task.resume()
+		}
+	}
+}
+#endif
+
+
+/* MARK: Cryptography */
+
+#if os(Linux)
+func memset_s(_ buffer: UnsafeMutableRawPointer!, _ size: Int, _ value: Int32, _ count: Int) {
+	memset(buffer, value, count)
+}
+#endif
 
 
 /* MARK: Background Activity */
