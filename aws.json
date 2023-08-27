@@ -45,8 +45,8 @@
 								"\n",
 								[
 									"#cloud-config",
-									"bootcmd:",
-									" - [ yum, -y, install, socat ]",
+									"packages:",
+									" - socat",
 									""
 								]
 							]
