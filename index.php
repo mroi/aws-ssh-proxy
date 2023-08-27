@@ -59,7 +59,7 @@ try {
 				'Filters' => [
 					[
 						'Name' => 'name',
-						'Values' => ['amzn2-ami-hvm-*-arm64-gp2']
+						'Values' => ['al2023-ami-minimal-*-arm64']
 					],
 					[
 						'Name' => 'owner-id',
