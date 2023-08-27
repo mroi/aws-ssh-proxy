@@ -22,11 +22,13 @@ VerifyHostKeyDNS no
 # environment variables distinguish between forward (server) and connect (client) mode
 # server port is forwarded to a socket on the VM, with auto-termination on disconnect
 Match exec "printenv SSH_PROXY_FORWARD"
-RemoteCommand trap 'sudo systemctl poweroff -qf' ERR EXIT HUP INT PIPE TERM ; for ((i=0; i<60; i++)) ; do sleep 5 ; fgrep -q sshd /proc/$PPID/cmdline || exit ; test "`ls ssh-client* 2> /dev/null`" && break ; done || exit ; for ((i=0; i<24*60; i++)) ; do sleep 60 ; fgrep -q sshd /proc/$PPID/cmdline || exit ; done
+RemoteCommand ssh-proxy forward
 RemoteForward /home/ec2-user/ssh-server localhost:ssh
 RequestTTY force
+SendEnv SSH_PROXY_FORWARD
 
 # clients connect the server socket to stdin/stdout to act as an SSH ProxyCommand
 # marker files facilitate the last client to terminate the VM five minutes after disconnect
 Match exec "printenv SSH_PROXY_CONNECT"
-RemoteCommand trap 'rm -f ssh-client-$PPID ; sleep 300 ; test "`ls ssh-client* 2> /dev/null`" || sudo systemctl poweroff -qf' ERR EXIT HUP INT PIPE TERM ; touch ssh-client-$PPID ; while ! test -e /home/ec2-user/ssh-server ; do sleep 5 ; fgrep -q sshd /proc/$PPID/cmdline || exit ; done ; socat stdio unix-connect:/home/ec2-user/ssh-server
+RemoteCommand ssh-proxy connect
+SendEnv SSH_PROXY_CONNECT
