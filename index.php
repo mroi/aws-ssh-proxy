@@ -92,18 +92,18 @@ try {
 					]
 				]
 			]);
-			$id = $result->search("Instances[0].InstanceId");
+			$instance = $result->search("Instances[0].InstanceId");
 		} else {
-			$id = $result->search("Reservations[].Instances[?State.Name=='pending'][].InstanceId | [0]");
+			$instance = $result->search("Reservations[].Instances[?State.Name=='pending'][].InstanceId | [0]");
 		}
 		flock($file, LOCK_UN);
 		fclose($file);
 
 		// wait until the instance is running
-		while ($id) {
+		while ($instance) {
 			sleep(5);
 			$result = $ec2->describeInstances([
-				'InstanceIds' => [$id]
+				'InstanceIds' => [$instance]
 			]);
 			if (!empty($result->search("Reservations[].Instances[?State.Name=='running'][]"))) break;
 		}
