@@ -8,7 +8,6 @@ let package = Package(
 	],
 	products: [
 		.executable(name: "ssh-connect", targets: ["Connect"]),
-		.executable(name: "ssh-forward", targets: ["Forward"])
 	],
 	dependencies: [
 		.package(url: "https://github.com/apple/swift-argument-parser.git", from: "1.0.0"),
@@ -16,7 +15,6 @@ let package = Package(
 	],
 	targets: [
 		.executableTarget(name: "Connect", dependencies: ["RemoteVM"], path: "connect"),
-		.executableTarget(name: "Forward", dependencies: ["RemoteVM"], path: "forward"),
 		.target(name: "RemoteVM", dependencies: ["Sandbox",
 			.product(name: "ArgumentParser", package: "swift-argument-parser"),
 			.product(name: "Crypto", package: "swift-crypto")
