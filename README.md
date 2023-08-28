@@ -26,7 +26,7 @@ steps:
 1. Create an SSH key pair and upload the public key to EC2 with the name `ssh-proxy`. Store 
    the keys in a files `proxy` and `proxy.pub` in your `~/.ssh` directory.
 2. Create an AWS stack from 
-   [`aws.json`](https://raw.githubusercontent.com/mroi/aws-ssh-proxy/master/aws.json) using 
+   [`aws.json`](https://raw.githubusercontent.com/mroi/aws-ssh-proxy/main/aws.json) using 
    [CloudFormation](https://aws.amazon.com/cloudformation/), either from the 
    [AWS Console](https://console.aws.amazon.com/cloudformation) or the 
    [command line](https://docs.aws.amazon.com/cli/latest/reference/cloudformation/). Use the 
@@ -38,8 +38,8 @@ PHP Web Service
 
 To install the web service, you need PHP-enabled web space. Follow these steps:
 
-1. Put [`index.php`](https://github.com/mroi/aws-ssh-proxy/blob/master/index.php) and 
-   [`.htaccess`](https://github.com/mroi/aws-ssh-proxy/blob/master/.htaccess) on your web 
+1. Put [`index.php`](https://github.com/mroi/aws-ssh-proxy/blob/main/index.php) and 
+   [`.htaccess`](https://github.com/mroi/aws-ssh-proxy/blob/main/.htaccess) on your web 
    server.
 2. Obtain the latest `aws.phar` from the 
    [AWS SDK releases](https://github.com/aws/aws-sdk-php/releases) and put it next to 
@@ -77,7 +77,7 @@ queries the status of the EC2 VMs using the PHP service. A running VM signifies 
 request and the daemon will forward its local SSH port to the VM.
 
 1. You install the launch daemon by invoking `make` in the 
-   [`proxy`](https://github.com/mroi/aws-ssh-proxy/blob/master/proxy/) directory. You can 
+   [`proxy`](https://github.com/mroi/aws-ssh-proxy/blob/main/proxy/) directory. You can 
    override variables (`DESTDIR`, `SIGNING_NAME`, …) to configure the installation.
 2. Register the daemon with launchd by copying the included plist file from 
    `SSHProxy.bundle/Contents/Resources` to `/Library/LaunchDaemons/`. You may want to 
