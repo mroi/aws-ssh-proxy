@@ -25,8 +25,10 @@ Match exec "printenv SSH_PROXY_FORWARD"
 RemoteCommand ssh-proxy forward
 RemoteForward /home/ec2-user/ssh-server localhost:ssh
 RequestTTY force
+SendEnv SSH_PROXY_FORWARD
 
 # clients connect the server socket to stdin/stdout to act as an SSH ProxyCommand
 # marker files facilitate the last client to terminate the VM five minutes after disconnect
 Match exec "printenv SSH_PROXY_CONNECT"
 RemoteCommand ssh-proxy connect
+SendEnv SSH_PROXY_CONNECT
