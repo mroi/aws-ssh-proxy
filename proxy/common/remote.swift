@@ -62,7 +62,7 @@ extension RemoteVM {
 		case .nothing:
 			return .success(nil)
 
-		case .proxy(let ip, let token):
+		case .address(let ip, let token):
 			guard let expectedToken = ip.authenticate(key: apiKey, nonce: nonce) else {
 				return .failure(RequestError.invalidResponse(String(ip)))
 			}
@@ -86,7 +86,7 @@ extension RemoteVM {
 		case .nothing:
 			return .failure(RequestError.invalidResponse(""))
 
-		case .proxy(let ip, let token):
+		case .address(let ip, let token):
 			guard let expectedToken = ip.authenticate(key: apiKey, nonce: nonce) else {
 				return .failure(RequestError.invalidResponse(String(ip)))
 			}
@@ -108,7 +108,7 @@ extension RemoteVM {
 		switch result {
 		case .nothing:
 			return .success(())
-		case .proxy(let ip, let token):
+		case .address(let ip, let token):
 			return .failure(RequestError.invalidResponse("\(ip) \(token)"))
 		case .error(let error):
 			return .failure(error)
@@ -121,7 +121,7 @@ extension RemoteVM {
 
 enum RequestResult {
 	case nothing
-	case proxy(ip: Substring, token: Substring)
+	case address(ip: Substring, token: Substring)
 	case error(_: RequestError)
 }
 
@@ -171,7 +171,7 @@ func request(_ url: URL, method: String = "GET") async -> RequestResult {
 		case 0:
 			return .nothing
 		case 2:
-			return .proxy(ip: pieces[0], token: pieces[1])
+			return .address(ip: pieces[0], token: pieces[1])
 		default:
 			return .error(.invalidResponse(responseBody))
 		}
