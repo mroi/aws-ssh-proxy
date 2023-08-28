@@ -21,25 +21,25 @@ LOCAL_ID     ?= $(shell scutil --get LocalHostName)
 SIGNING_NAME ?= $(shell id -F)
 
 TOPLEVEL = \
-	$(PREFIX)/SSHProxy.bundle/Contents/Info.plist
+	$(PREFIX)/UnisonSync.bundle/Contents/Info.plist
 BINARIES = \
-	$(PREFIX)/SSHProxy.bundle/Contents/MacOS/ssh-connect \
+	$(PREFIX)/UnisonSync.bundle/Contents/MacOS/unison-connect
 
 all: $(TOPLEVEL) $(BINARIES) $(RESOURCES)
 
 install:
 	$(MAKE) PREFIX=$(DESTDIR) all
-	-codesign -f --deep -s "$(SIGNING_NAME)" -i $(BUNDLE_ID) -o kill,hard,runtime $(DESTDIR)/SSHProxy.bundle
+	-codesign -f --deep -s "$(SIGNING_NAME)" -i $(BUNDLE_ID) -o kill,hard,runtime $(DESTDIR)/UnisonSync.bundle
 
 log:
-	@log stream --predicate '(process BEGINSWITH "ssh") OR (eventMessage CONTAINS "ssh")'
+	@log stream --predicate '(process BEGINSWITH "unison") OR (eventMessage CONTAINS "unison")'
 
 else
 
 LOCAL_ID ?= $(shell hostname)
 
 BINARIES = \
-	$(PREFIX)/libexec/ssh-connect \
+	$(PREFIX)/libexec/unison-connect
 
 all: $(BINARIES) $(RESOURCES)
 
@@ -60,7 +60,7 @@ $(BINARIES): $(call dirname,$(BINARIES))/%: .build/$(CONFIG)/%
 $(RESOURCES): $(call dirname,$(RESOURCES))/%: resources/%
 	mkdir -p $(@D) && cp $< $@ && chmod 644 $@
 
-.build/$(CONFIG)/ssh-connect: .build/$(CONFIG)/ssh-%: %/main.swift $(wildcard common/*)
+.build/$(CONFIG)/unison-connect: .build/$(CONFIG)/unison-%: %/main.swift $(wildcard common/*)
 	rm -f $@
 	swift build $(foreach arch,$(ARCHS),--arch $(arch)) --product $(@F) --configuration $(CONFIG)
 	$(MAKE) .check
@@ -81,7 +81,7 @@ ifneq ($(shell which nix),)
 endif
 
 connect: all
-	$(call dirname,$(BINARIES))/ssh-$@ --id $(LOCAL_ID) --api-url $(API_URL) --api-key $(API_KEY)
+	$(call dirname,$(BINARIES))/unison-$@ --id $(LOCAL_ID) --api-url $(API_URL) --api-key $(API_KEY)
 
 clean:
 	rm -rf .build .check .swiftpm $(PREFIX) Package.resolved
