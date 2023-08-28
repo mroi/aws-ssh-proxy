@@ -2,12 +2,12 @@
 import PackageDescription
 
 let package = Package(
-	name: "SSHProxy",
+	name: "UnisonSync",
 	platforms: [
 		.macOS(.v11)
 	],
 	products: [
-		.executable(name: "ssh-connect", targets: ["Connect"]),
+		.executable(name: "unison-connect", targets: ["Connect"])
 	],
 	dependencies: [
 		.package(url: "https://github.com/apple/swift-argument-parser.git", from: "1.0.0"),
