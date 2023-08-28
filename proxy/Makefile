@@ -56,7 +56,7 @@ $(BINARIES): $(call dirname,$(BINARIES))/%: .build/$(CONFIG)/%
 $(RESOURCES): $(call dirname,$(RESOURCES))/%: resources/%
 	mkdir -p $(@D) && cp $< $@ && chmod 644 $@
 
-.build/$(CONFIG)/unison-connect: .build/$(CONFIG)/unison-%: %/main.swift $(wildcard common/*)
+.build/$(CONFIG)/unison-connect: $(wildcard common/* connect/*)
 	rm -f $@
 	swift build --product $(@F) --configuration $(CONFIG)
 	$(MAKE) .check
