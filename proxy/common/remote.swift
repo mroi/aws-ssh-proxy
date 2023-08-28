@@ -24,7 +24,6 @@ public struct RemoteVM: ParsableCommand {
 
 	public static var configuration = CommandConfiguration(commandName: CommandLine.arguments.first)
 
-	@Option var id: String
 	@Option var apiUrl: URL
 	@Option(transform: SecureData.init) var apiKey: SecureData
 
@@ -45,9 +44,9 @@ extension RemoteVM {
 
 	private func authenticatedUrl(forCommand command: String) -> (url: URL, nonce: SecureData) {
 		let nonce = SecureData(randomBytes: 10)
-		let query = "\(command)?\(id)"
+		let query = "\(command)"
 		let token = query.authenticate(key: apiKey, nonce: nonce)!
-		let url = URL(string: "\(query)&\(token)", relativeTo: apiUrl)!
+		let url = URL(string: "\(query)?\(token)", relativeTo: apiUrl)!
 
 		return (url, nonce)
 	}
