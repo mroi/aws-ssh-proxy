@@ -14,11 +14,12 @@ let package = Package(
 		.package(url: "https://github.com/apple/swift-crypto.git", "1.0.0" ..< "4.0.0")
 	],
 	targets: [
-		.executableTarget(name: "Connect", dependencies: ["RemoteVM"], path: "connect"),
+		.executableTarget(name: "Connect", dependencies: ["RemoteVM", "PassFd"], path: "connect", exclude: ["passfd.c"]),
 		.target(name: "RemoteVM", dependencies: ["Sandbox",
 			.product(name: "ArgumentParser", package: "swift-argument-parser"),
 			.product(name: "Crypto", package: "swift-crypto")
 		], path: "common", exclude: ["sandbox.c"]),
+		.target(name: "PassFd", path: "connect", sources: ["passfd.c"], publicHeadersPath: "."),
 		.target(name: "Sandbox", path: "common", sources: ["sandbox.c"], publicHeadersPath: ".")
 	]
 )

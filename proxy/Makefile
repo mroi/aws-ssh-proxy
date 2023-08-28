@@ -58,7 +58,7 @@ $(BINARIES): $(call dirname,$(BINARIES))/%: $(BINPATH)/%
 $(RESOURCES): $(call dirname,$(RESOURCES))/%: resources/%
 	mkdir -p $(@D) && cp $< $@ && chmod 644 $@
 
-$(BINPATH)/unison-connect: $(BINPATH)/unison-%: %/main.swift $(wildcard common/*)
+$(BINPATH)/unison-connect: $(wildcard common/* connect/*)
 	rm -f $@
 	swift build $(foreach arch,$(ARCHS),--arch $(arch)) --product $(@F) --configuration $(CONFIG)
 	$(MAKE) .check
