@@ -63,7 +63,7 @@
 					substituteInPlace proxy/common/ssh.swift --replace-fail /usr/bin/ssh ${openssh}/bin/ssh
 				'';
 				dontUseSwiftpmBuild = true;
-				makeFlags = [ "-C proxy" "DESTDIR=$(out)" "LOCAL_ID=" "API_URL=" "API_KEY=" ];
+				makeFlags = [ "-C proxy" "DESTDIR=$(out)" "API_URL=" "API_KEY=" ];
 			};
 
 		shell = system:
