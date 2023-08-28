@@ -18,7 +18,6 @@ ifeq ($(shell uname),Darwin)
 
 BUNDLE_ID     = $(shell PlistBuddy -c 'Print CFBundleIdentifier' resources/Info.plist | tr -d '"')
 DESTDIR      ?= /Users/Shared/Library/CoreServices
-LOCAL_ID     ?= $(shell scutil --get LocalHostName)
 SIGNING_NAME ?= $(shell id -F)
 
 TOPLEVEL = \
@@ -36,8 +35,6 @@ log:
 	@log stream --predicate '(process BEGINSWITH "unison") OR (eventMessage CONTAINS "unison")'
 
 else
-
-LOCAL_ID ?= $(shell hostname)
 
 BINARIES = \
 	$(PREFIX)/libexec/unison-connect
@@ -82,7 +79,7 @@ ifneq ($(shell which nix),)
 endif
 
 connect: all
-	$(call dirname,$(BINARIES))/unison-$@ --id $(LOCAL_ID) --api-url $(API_URL) --api-key $(API_KEY)
+	$(call dirname,$(BINARIES))/unison-$@ --api-url $(API_URL) --api-key $(API_KEY)
 
 clean:
 	rm -rf .build .check .swiftpm $(PREFIX) Package.resolved
