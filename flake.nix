@@ -1,8 +1,8 @@
 {
-	description = "connect machines over SSH using Amazon EC2 VMs";
+	description = "unison file sync to Amazon EFS storage";
 	outputs = { self, nixpkgs }: let
 
-		ssh-proxy = system:
+		unison-sync = system:
 			with nixpkgs.legacyPackages.${system}.extend (self: super: {
 				# add swift to Xcode wrapper
 				xcodeenv = super.xcodeenv // {
@@ -18,7 +18,7 @@
 				};
 			});
 			clangStdenv.mkDerivation {
-				name = "ssh-proxy-${lib.substring 0 8 self.lastModifiedDate}";
+				name = "unison-sync-${lib.substring 0 8 self.lastModifiedDate}";
 				src = self;
 				__noChroot = true;
 				nativeBuildInputs =
@@ -66,10 +66,10 @@
 			};
 
 	in {
-		packages.x86_64-darwin.default = ssh-proxy "x86_64-darwin";
-		packages.x86_64-linux.default = ssh-proxy "x86_64-linux";
-		packages.x86_64-darwin.ssh-proxy = ssh-proxy "x86_64-darwin";
-		packages.x86_64-linux.ssh-proxy = ssh-proxy "x86_64-linux";
+		packages.x86_64-darwin.default = unison-sync "x86_64-darwin";
+		packages.x86_64-linux.default = unison-sync "x86_64-linux";
+		packages.x86_64-darwin.unison-sync = unison-sync "x86_64-darwin";
+		packages.x86_64-linux.unison-sync = unison-sync "x86_64-linux";
 		devShells.x86_64-darwin.default = shell "x86_64-darwin";
 		devShells.x86_64-linux.default = shell "x86_64-linux";
 	};
