@@ -105,14 +105,25 @@ try {
 				'InstanceIds' => [$instance]
 			]);
 			if (!empty($result->search("Reservations[].Instances[?State.Name=='running'][]"))) break;
-			sleep(5);
 		}
 		// fallthrough intended
 
 	case 'status':
-		// print public IPs of running VMs
+		// fetch public IPs of running VMs
 		$ip = $result->search("Reservations[].Instances[?State.Name=='running'][].PublicIpAddress | [0]");
+
 		if ($ip) {
+			// wait for SSH port to be ready
+			for ($i = 0; $i < 10; $i++) {
+				$socket = @fsockopen($ip, 22);
+				if (is_resource($socket)) {
+					fclose($socket);
+					break;
+				}
+				sleep(5);
+			}
+
+			// authenticate and send response
 			$auth = base64_encode($nonce . hash_hmac('sha256', $nonce . $ip, $apiKey, true));
 			print("${ip} ${auth}\n");
 		}
