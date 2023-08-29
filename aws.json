@@ -1,11 +1,19 @@
 {
 	"AWSTemplateFormatVersion": "2010-09-09",
+	"Transform": "AWS::LanguageExtensions",
+	"Parameters": {
+		"UnisonSyncSubnetIds": {
+			"Type": "CommaDelimitedList",
+			"Description": "The subnets in which EFS mount points are created. List all subnets where EC2 can launch its VMs. For technical reasons, only the numeric part without the leading 'subnet-' should be given.",
+			"Default": "0969ddae9b7dda4e4, 049b25801a7f8ca33, 02c085b1c5479951e"
+		}
+	},
 	"Resources": {
-		"UnisonSyncSecurityGroup": {
+		"UnisonSyncEC2SecurityGroup": {
 			"Type": "AWS::EC2::SecurityGroup",
 			"Properties": {
 				"GroupName": {
-					"Ref": "AWS::StackName"
+					"Fn::Sub": "${AWS::StackName}-ec2"
 				},
 				"GroupDescription": "ssh access allowed via port 22 from anywhere",
 				"SecurityGroupIngress": [
@@ -26,6 +34,78 @@
 				]
 			}
 		},
+		"UnisonSyncEFSSecurityGroup": {
+			"Type": "AWS::EC2::SecurityGroup",
+			"Properties": {
+				"GroupName": {
+					"Fn::Sub": "${AWS::StackName}-efs"
+				},
+				"GroupDescription": {
+					"Fn::Sub": "EFS access allowed from ${AWS::StackName} EC2 instances"
+				},
+				"SecurityGroupIngress": [
+					{
+						"IpProtocol": "tcp",
+						"FromPort": 2049,
+						"ToPort": 2049,
+						"SourceSecurityGroupId": {
+							"Fn::GetAtt": [
+								"UnisonSyncEC2SecurityGroup",
+								"GroupId"
+							]
+						}
+					}
+				]
+			}
+		},
+		"UnisonSyncFileSystem": {
+			"Type": "AWS::EFS::FileSystem",
+			"Properties": {
+				"FileSystemTags": [
+					{
+						"Key": "Name",
+						"Value": {
+							"Ref": "AWS::StackName"
+						}
+					}
+				],
+				"Encrypted": true,
+				"LifecyclePolicies": [],
+				"BackupPolicy": {
+					"Status": "ENABLED"
+				}
+			}
+		},
+		"Fn::ForEach::UnisonSyncSubnets": [
+			"SubnetId",
+			{
+				"Ref": "UnisonSyncSubnetIds"
+			},
+			{
+				"UnisonSyncMountTarget${SubnetId}": {
+					"Type": "AWS::EFS::MountTarget",
+					"Properties": {
+						"FileSystemId": {
+							"Fn::GetAtt": [
+								"UnisonSyncFileSystem",
+								"Arn"
+							]
+						},
+						"SubnetId": {
+							"Fn::Sub": "subnet-${SubnetId}"
+						},
+						"SecurityGroups": [
+							{
+								"Fn::GetAtt": [
+									"UnisonSyncEFSSecurityGroup",
+									"GroupId"
+								]
+							}
+						]
+					}
+				}
+			}
+		],
 		"UnisonSyncLaunchTemplate": {
 			"Type": "AWS::EC2::LaunchTemplate",
 			"Properties": {
@@ -45,6 +125,12 @@
 								"\n",
 								[
 									"#cloud-config",
+									"bootcmd:",
+									" - yum --assumeyes --quiet install nfs-utils",
+									{
+										"Fn::Sub": " - [ mount, -t, nfs, -o, \"nfsvers=4.1,rsize=1048576,wsize=1048576,hard,timeo=600,retrans=2,noresvport\", ${UnisonSyncFileSystem.FileSystemId}.efs.${AWS::Region}.${AWS::URLSuffix}:/, /mnt ]"
+									},
+									"",
 									"groups:",
 									" - unison",
 									" - admin",
@@ -121,7 +207,7 @@
 							"Groups": [
 								{
 									"Fn::GetAtt": [
-										"UnisonSyncSecurityGroup",
+										"UnisonSyncEC2SecurityGroup",
 										"GroupId"
 									]
 								}
