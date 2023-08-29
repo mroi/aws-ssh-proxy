@@ -1,4 +1,4 @@
-SSH-Proxy Using Amazon EC2 Virtual Machines
+SSH Proxy Using Amazon EC2 Virtual Machines
 ===========================================
 
 Connecting to remote machines via SSH becomes increasingly complicated, when these machines 
