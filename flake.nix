@@ -58,6 +58,8 @@
 		in {
 			packages.x86_64-darwin.default = ssh-proxy "x86_64-darwin";
 			packages.x86_64-linux.default = ssh-proxy "x86_64-linux";
+			packages.x86_64-darwin.ssh-proxy = ssh-proxy "x86_64-darwin";
+			packages.x86_64-linux.ssh-proxy = ssh-proxy "x86_64-linux";
 			devShells.x86_64-darwin.default = shell "x86_64-darwin";
 			devShells.x86_64-linux.default = shell "x86_64-linux";
 		};
