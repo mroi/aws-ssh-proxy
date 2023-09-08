@@ -51,8 +51,8 @@ else
 LOCAL_ID ?= $(shell hostname)
 
 BINARIES = \
-	$(PREFIX)/bin/ssh-connect \
-	$(PREFIX)/bin/ssh-forward
+	$(PREFIX)/libexec/ssh-connect \
+	$(PREFIX)/libexec/ssh-forward
 RESOURCES = \
 	$(PREFIX)/share/ssh-proxy/ssh_config
 
