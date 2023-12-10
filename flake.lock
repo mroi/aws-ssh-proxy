@@ -2,11 +2,11 @@
   "nodes": {
     "nixpkgs": {
       "locked": {
-        "lastModified": 1692808169,
-        "narHash": "sha256-x9Opq06rIiwdwGeK2Ykj69dNc2IvUH1fY55Wm7atwrE=",
+        "lastModified": 1702172177,
+        "narHash": "sha256-2T1DjuXz0bVxy5g8oF9FYioHOLWkXw5EdW687NDQakE=",
         "owner": "NixOS",
         "repo": "nixpkgs",
-        "rev": "9201b5ff357e781bf014d0330d18555695df7ba8",
+        "rev": "2873a73123077953f3e6f34964466018876d87c4",
         "type": "github"
       },
       "original": {
@@ -24,11 +24,11 @@
     "swift-argument-parser": {
       "flake": false,
       "locked": {
-        "lastModified": 1692126095,
-        "narHash": "sha256-qEJ329hqQyQVxtHScD7qPmWW9ZDf9bX+4xgpDlX0w5A=",
+        "lastModified": 1702208342,
+        "narHash": "sha256-B4SwsR5v5dHaBZZMQsHmMh4oopkKWJgVl+k5yULaV3I=",
         "owner": "apple",
         "repo": "swift-argument-parser",
-        "rev": "8f4d2753f0e4778c76d5f05ad16c74f707390531",
+        "rev": "c8ed701b513cf5177118a175d85fbbbcd707ab41",
         "type": "github"
       },
       "original": {
@@ -40,11 +40,11 @@
     "swift-crypto": {
       "flake": false,
       "locked": {
-        "lastModified": 1691078554,
-        "narHash": "sha256-ysi7IhnRsOkQXXes2xIXtsEBPv84nA7xFjPcuIgBfWA=",
+        "lastModified": 1702208342,
+        "narHash": "sha256-3LS1QrhTevZs51/qtfuXPZpm62d4gEn8pqMsYfED0yM=",
         "owner": "apple",
         "repo": "swift-crypto",
-        "rev": "60f13f60c4d093691934dc6cfdf5f508ada1f894",
+        "rev": "b51f1d6845b353a2121de1c6a670738ec33561a6",
         "type": "github"
       },
       "original": {
