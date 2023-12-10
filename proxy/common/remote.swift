@@ -142,6 +142,7 @@ func request(_ url: URL, method: String = "GET") async -> RequestResult {
 #else
 			let config = URLSessionConfiguration.ephemeral
 #endif
+			config.timeoutIntervalForRequest = 300
 			config.httpCookieAcceptPolicy = .never
 			config.httpShouldSetCookies = false
 			config.urlCache = nil
