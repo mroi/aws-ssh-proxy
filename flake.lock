@@ -24,7 +24,7 @@
     "swift-argument-parser": {
       "flake": false,
       "locked": {
-        "lastModified": 1702208342,
+        "lastModified": 1701883844,
         "narHash": "sha256-B4SwsR5v5dHaBZZMQsHmMh4oopkKWJgVl+k5yULaV3I=",
         "owner": "apple",
         "repo": "swift-argument-parser",
@@ -40,7 +40,7 @@
     "swift-crypto": {
       "flake": false,
       "locked": {
-        "lastModified": 1702208342,
+        "lastModified": 1696411184,
         "narHash": "sha256-3LS1QrhTevZs51/qtfuXPZpm62d4gEn8pqMsYfED0yM=",
         "owner": "apple",
         "repo": "swift-crypto",
