@@ -84,7 +84,7 @@ ifneq ($(shell which nix),)
 		test -d $$pkg/.git && mv $$pkg/.git .build/ ; \
 		hash=$$(nix hash path $$pkg) ; \
 		test -d .build/.git && mv .build/.git $$pkg/ ; \
-		if ! grep -qF "$$hash" ../flake.lock ; then \
+		if ! grep -qF "$$hash" ../flake.nix ; then \
 			echo "$$pkg is not a known-good version" ; \
 			exit 1 ; \
 		fi ; \
