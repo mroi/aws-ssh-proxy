@@ -29,12 +29,17 @@
 						xcbuild
 					];
 				patchPhase = let
-					swift-argument-parser = fetchFromGitHub {
+					swift-argument-parser = fetchFromGitHub ({
 						owner = "apple";
 						repo = "swift-argument-parser";
 						rev = "1.3.0";
 						hash = "sha256-B4SwsR5v5dHaBZZMQsHmMh4oopkKWJgVl+k5yULaV3I=";
-					};
+					} // lib.optionalAttrs clangStdenv.buildPlatform.isLinux {
+						# TODO: compilation of argument parser 1.3.0 fails
+						# https://github.com/NixOS/nixpkgs/pull/256956#issuecomment-1891063661
+						rev = "1.2.3";
+						hash = "sha256-qEJ329hqQyQVxtHScD7qPmWW9ZDf9bX+4xgpDlX0w5A=";
+					});
 					swift-crypto = fetchFromGitHub {
 						owner = "apple";
 						repo = "swift-crypto";
@@ -56,7 +61,7 @@
 			with nixpkgs.legacyPackages.${system};
 			mkShellNoCC {
 				packages = [ php ] ++
-					lib.optionals stdenv.isLinux [ clang swift swiftpm openssh ];
+					lib.optionals stdenv.isLinux [ gnumake clang swift swiftpm openssh ];
 				shellHook = "test -r ~/.shellrc && . ~/.shellrc";
 			};
 

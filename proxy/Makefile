@@ -58,6 +58,9 @@ RESOURCES = \
 
 all: $(BINARIES) $(RESOURCES)
 
+install:
+	$(MAKE) PREFIX=$(DESTDIR) all
+
 endif
 
 # extract the directory portion from a list of files (sort is to deduplicate)
