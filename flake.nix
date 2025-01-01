@@ -6,10 +6,13 @@
 			with nixpkgs.legacyPackages.${system}.extend (self: super: {
 				# add swift to Xcode wrapper
 				xcodeenv = super.xcodeenv // {
-					composeXcodeWrapper = version: (super.xcodeenv.composeXcodeWrapper version).overrideAttrs (attrs: {
+					composeXcodeWrapper = args: (super.xcodeenv.composeXcodeWrapper args).overrideAttrs (attrs: {
 						buildCommand = attrs.buildCommand + ''
+							ln -s /usr/libexec/PlistBuddy $out/bin/
+							ln -s /usr/bin/xcode-select $out/bin/
 							cat <<- "EOF" > $out/bin/swift
 								#!/bin/sh
+								unset DEVELOPER_DIR SDKROOT
 								exec /usr/bin/swift "$@" --disable-sandbox
 							EOF
 							chmod a+x $out/bin/swift
@@ -25,8 +28,7 @@
 					lib.optionals clangStdenv.buildPlatform.isLinux [
 						swift swiftpm
 					] ++ lib.optionals clangStdenv.buildPlatform.isDarwin [
-						(xcodeenv.composeXcodeWrapper { version = "14.2"; })
-						xcbuild
+						(xcodeenv.composeXcodeWrapper {})
 					];
 				patchPhase = let
 					swift-argument-parser = fetchFromGitHub ({
@@ -62,7 +64,10 @@
 			mkShellNoCC {
 				packages = [ php ] ++
 					lib.optionals stdenv.isLinux [ gnumake clang swift swiftpm openssh ];
-				shellHook = "test -r ~/.local/config/shell/rc && . ~/.local/config/shell/rc";
+				shellHook = ''
+					unset DEVELOPER_DIR SDKROOT
+					test -r ~/.local/config/shell/rc && . ~/.local/config/shell/rc
+				'';
 			};
 
 	in {
