@@ -60,7 +60,6 @@
 					substituteInPlace swift-crypto/Package.swift --replace-fail 'url: "https://github.com/apple/swift-asn1.git"' 'path: "../swift-asn1"), //'
 					substituteInPlace proxy/Package.swift --replace-fail 'url: "https://github.com/apple/swift-argument-parser.git"' 'path: "../swift-argument-parser"), //'
 					substituteInPlace proxy/Package.swift --replace-fail 'url: "https://github.com/apple/swift-crypto.git"' 'path: "../swift-crypto"), //'
-					substituteInPlace proxy/common/ssh.swift --replace-fail /usr/bin/ssh ${openssh}/bin/ssh
 				'';
 				dontUseSwiftpmBuild = true;
 				makeFlags = [ "-C proxy" "DESTDIR=$(out)" "API_URL=" "API_KEY=" ];
@@ -70,7 +69,7 @@
 			with nixpkgs.legacyPackages.${system};
 			mkShellNoCC {
 				packages = [ php ] ++
-					lib.optionals stdenv.isLinux [ gnumake clang swift swiftpm openssh ];
+					lib.optionals stdenv.isLinux [ gnumake clang swift swiftpm ];
 				shellHook = ''
 					test -r ~/.local/config/shell/rc && . ~/.local/config/shell/rc
 				'';
