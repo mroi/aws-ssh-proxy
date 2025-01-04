@@ -20,14 +20,14 @@
 					});
 				};
 			});
-			clangStdenv.mkDerivation {
+			stdenvNoCC.mkDerivation {
 				name = "ssh-proxy-${lib.substring 0 8 self.lastModifiedDate}";
 				src = self;
 				__noChroot = true;
 				nativeBuildInputs =
-					lib.optionals clangStdenv.buildPlatform.isLinux [
-						swift swiftpm
-					] ++ lib.optionals clangStdenv.buildPlatform.isDarwin [
+					lib.optionals stdenvNoCC.buildPlatform.isLinux [
+						clang swift swiftpm
+					] ++ lib.optionals stdenvNoCC.buildPlatform.isDarwin [
 						(xcodeenv.composeXcodeWrapper {})
 					];
 				patchPhase = let
@@ -36,7 +36,7 @@
 						repo = "swift-argument-parser";
 						rev = "1.3.0";
 						hash = "sha256-B4SwsR5v5dHaBZZMQsHmMh4oopkKWJgVl+k5yULaV3I=";
-					} // lib.optionalAttrs clangStdenv.buildPlatform.isLinux {
+					} // lib.optionalAttrs stdenvNoCC.buildPlatform.isLinux {
 						# TODO: compilation of argument parser 1.3.0 fails
 						# https://github.com/NixOS/nixpkgs/pull/256956#issuecomment-1891063661
 						rev = "1.2.3";
