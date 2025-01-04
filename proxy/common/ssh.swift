@@ -13,7 +13,9 @@ public enum ProxyMode: String {
 
 public func ssh(mode: ProxyMode, to ip: String) async throws {
 	class SignalHandler {
-		static let shared = SignalHandler()
+		// FIXME: access to the shared instance’s subprocess member can be racy
+		// and should be protected by a lock
+		static nonisolated(unsafe) let shared = SignalHandler()
 		var subprocess: Process?
 		private init() {
 			func handler(signal: Int32) -> Void {

@@ -3,9 +3,12 @@ import Crypto
 
 
 /// Stores byte data that gets zeroed whenever the instance is deallocated.
-class SecureData {
+///
+/// - Note: Sendability is unchecked, but warranted, because after initialization,
+///   the members of the class cannot be mutated through its public API.
+class SecureData: @unchecked Sendable {
 	typealias Buffer = UnsafeMutableBufferPointer<UInt8>
-	private var buffer: Buffer
+	private let buffer: Buffer
 	init(string: String) {
 		assert(string.isContiguousUTF8)  // make sure we do not create temp copies
 		buffer = Buffer.allocate(capacity: string.lengthOfBytes(using: .utf8))

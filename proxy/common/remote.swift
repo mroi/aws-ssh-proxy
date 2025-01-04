@@ -20,9 +20,9 @@ public func sandbox() -> Void {
 /* MARK: Command Line Options */
 
 /// Parses command line arguments to interact with a remote VM.
-public struct RemoteVM: ParsableCommand {
+public struct RemoteVM: ParsableCommand, Sendable {
 
-	public static var configuration = CommandConfiguration(commandName: CommandLine.arguments.first)
+	public static let configuration = CommandConfiguration(commandName: CommandLine.arguments.first)
 
 	@Option var id: String
 	@Option var apiUrl: URL
@@ -31,7 +31,7 @@ public struct RemoteVM: ParsableCommand {
 	public init() {}
 }
 
-extension URL: ExpressibleByArgument {
+extension URL: @retroactive ExpressibleByArgument {
 	public init?(argument: String) {
 		guard let url = URL.init(string: argument) else { return nil }
 		self = url
