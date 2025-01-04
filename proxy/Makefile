@@ -2,6 +2,7 @@
 
 API_URL ?= $(shell php -r 'include "../config.php"; echo $$apiUrl;')
 API_KEY ?= $(shell php -r 'include "../config.php"; echo $$apiKey;')
+BINPATH ?= $(shell swift build $(foreach arch,$(ARCHS),--arch $(arch)) --show-bin-path --configuration $(CONFIG))
 PREFIX  ?= .product
 CONFIG  ?= release
 ARCHS   ?= x86_64 arm64
@@ -70,13 +71,13 @@ dirname = $(sort $(patsubst %/,%,$(dir $(1))))
 $(TOPLEVEL): $(call dirname,$(TOPLEVEL))/%: resources/%
 	mkdir -p $(@D) && cp $< $@ && chmod 644 $@
 
-$(BINARIES): $(call dirname,$(BINARIES))/%: .build/$(CONFIG)/%
+$(BINARIES): $(call dirname,$(BINARIES))/%: $(BINPATH)/%
 	mkdir -p $(@D) && cp $< $@ && chmod 755 $@
 
 $(RESOURCES): $(call dirname,$(RESOURCES))/%: resources/%
 	mkdir -p $(@D) && cp $< $@ && chmod 644 $@
 
-.build/$(CONFIG)/ssh-connect .build/$(CONFIG)/ssh-forward: .build/$(CONFIG)/ssh-%: %/main.swift $(wildcard common/*)
+$(BINPATH)/ssh-connect $(BINPATH)/ssh-forward: $(BINPATH)/ssh-%: %/main.swift $(wildcard common/*)
 	rm -f $@
 	swift build $(foreach arch,$(ARCHS),--arch $(arch)) --product $(@F) --configuration $(CONFIG)
 	$(MAKE) .check
