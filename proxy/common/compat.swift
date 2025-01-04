@@ -17,11 +17,11 @@ public struct ProxyBundle {
 		return Bundle.main.path(forResource: name, ofType: type)
 	}
 #elseif os(Linux)
-	public static var bundleIdentifier: String? { return "ssh-proxy" }
+	public static var bundleIdentifier: String? { return "unison-sync" }
 	public static let bundlePath: String = {
 		let executable = URL(fileURLWithPath: "/proc/self/exe").resolvingSymlinksInPath()
 		let binDir = executable.deletingLastPathComponent()
-		var bundleDir = binDir.appendingPathComponent("../share/ssh-proxy", isDirectory: true)
+		var bundleDir = binDir.appendingPathComponent("../share/unison-sync", isDirectory: true)
 		bundleDir.standardize()
 		return bundleDir.path
 	}()
