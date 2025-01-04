@@ -1,7 +1,7 @@
 {
 	"AWSTemplateFormatVersion": "2010-09-09",
 	"Resources": {
-		"SSHProxySecurityGroup": {
+		"UnisonSyncSecurityGroup": {
 			"Type": "AWS::EC2::SecurityGroup",
 			"Properties": {
 				"GroupName": {
@@ -26,7 +26,7 @@
 				]
 			}
 		},
-		"SSHProxyLaunchTemplate": {
+		"UnisonSyncLaunchTemplate": {
 			"Type": "AWS::EC2::LaunchTemplate",
 			"Properties": {
 				"LaunchTemplateName": {
@@ -49,13 +49,12 @@
 									" - socat",
 									"",
 									"write_files:",
-									" - path: /etc/ssh/sshd_config.d/99-proxy-restrict.conf",
+									" - path: /etc/ssh/sshd_config.d/99-sync-restrict.conf",
 									"   permissions: 0o600",
 									"   content: |",
 									"      Match User ec2-user",
-									"      AcceptEnv SSH_PROXY_*",
-									"      ForceCommand /usr/local/bin/ssh-proxy",
-									" - path: /usr/local/bin/ssh-proxy",
+									"      ForceCommand /usr/local/bin/unison",
+									" - path: /usr/local/bin/unison",
 									"   permissions: 0o755",
 									"   content: |",
 									"      #!/bin/sh -e",
@@ -71,7 +70,7 @@
 									"      ",
 									"      case \"$SSH_ORIGINAL_COMMAND\" in",
 									"      ",
-									"      'ssh-proxy forward')",
+									"      'unison-sync forward')",
 									"        trap 'sudo systemctl poweroff -qf' EXIT HUP INT PIPE TERM",
 									"        # wait five minutes for a client to connect",
 									"        i=0 ; while test $i -lt 60 ; do",
@@ -88,7 +87,7 @@
 									"        done",
 									"        ;;",
 									"      ",
-									"      'ssh-proxy connect')",
+									"      'unison-sync connect')",
 									"        # last leaving client shuts down machine",
 									"        trap 'rm -f ssh-client-$PPID ; sleep 300 ; test \"$(ls ssh-client* 2> /dev/null)\" || sudo systemctl poweroff -qf' EXIT HUP INT PIPE TERM",
 									"        # create client marker file",
@@ -135,7 +134,7 @@
 							"Groups": [
 								{
 									"Fn::GetAtt": [
-										"SSHProxySecurityGroup",
+										"UnisonSyncSecurityGroup",
 										"GroupId"
 									]
 								}
@@ -151,7 +150,7 @@
 							"Tags": [
 								{
 									"Value": "<undefined>",
-									"Key": "ssh-proxy"
+									"Key": "unison-sync"
 								}
 							]
 						}
@@ -159,7 +158,7 @@
 				}
 			}
 		},
-		"SSHProxyUser": {
+		"UnisonSyncUser": {
 			"Type": "AWS::IAM::User",
 			"Properties": {
 				"UserName": {
@@ -190,7 +189,7 @@
 									"Condition": {
 										"StringEquals": {
 											"ec2:LaunchTemplate": {
-												"Fn::Sub": "arn:aws:ec2:${AWS::Region}:${AWS::AccountId}:launch-template/${SSHProxyLaunchTemplate}"
+												"Fn::Sub": "arn:aws:ec2:${AWS::Region}:${AWS::AccountId}:launch-template/${UnisonSyncLaunchTemplate}"
 											}
 										},
 										"Bool": {
@@ -227,7 +226,7 @@
 										},
 										"ForAllValues:StringEquals": {
 											"aws:TagKeys": [
-												"ssh-proxy"
+												"unison-sync"
 											]
 										}
 									}
@@ -238,7 +237,7 @@
 									"Resource": "*",
 									"Condition": {
 										"StringLike": {
-											"ec2:ResourceTag/ssh-proxy": "*"
+											"ec2:ResourceTag/unison-sync": "*"
 										}
 									}
 								}
