@@ -32,7 +32,7 @@ if (!empty($accept) && !in_array($id, $accept)) {
 
 try {
 	$ec2 = new Aws\Ec2\Ec2Client([
-		'profile' => 'ssh-proxy',
+		'profile' => 'unison-sync',
 		'region' => $region,
 		'version' => 'latest'
 	]);
@@ -40,7 +40,7 @@ try {
 	$result = $ec2->describeInstances([
 		'Filters' => [
 			[
-				'Name' => 'tag:ssh-proxy',
+				'Name' => 'tag:unison-sync',
 				'Values' => [$id]
 			]
 		]
@@ -76,7 +76,7 @@ try {
 			$result = $ec2->runInstances([
 				'ImageId' => $image,
 				'LaunchTemplate' => [
-					'LaunchTemplateName' => 'ssh-proxy'
+					'LaunchTemplateName' => 'unison-sync'
 				],
 				'MaxCount' => 1,
 				'MinCount' => 1,
@@ -85,7 +85,7 @@ try {
 						'ResourceType' => 'instance',
 						'Tags' => [
 							[
-								'Key' => 'ssh-proxy',
+								'Key' => 'unison-sync',
 								'Value' => $id
 							]
 						]
