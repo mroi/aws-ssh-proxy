@@ -4,6 +4,7 @@ API_URL ?= $(shell php -r 'include "../config.php"; echo $$apiUrl;')
 API_KEY ?= $(shell php -r 'include "../config.php"; echo $$apiKey;')
 PREFIX  ?= .product
 CONFIG  ?= release
+ARCHS   ?= x86_64 arm64
 
 ifeq ($(IN_NIX_SHELL),)
 ifneq ($(shell which nix),)
@@ -77,7 +78,7 @@ $(RESOURCES): $(call dirname,$(RESOURCES))/%: resources/%
 
 .build/$(CONFIG)/ssh-connect .build/$(CONFIG)/ssh-forward: .build/$(CONFIG)/ssh-%: %/main.swift $(wildcard common/*)
 	rm -f $@
-	swift build --product $(@F) --configuration $(CONFIG)
+	swift build $(foreach arch,$(ARCHS),--arch $(arch)) --product $(@F) --configuration $(CONFIG)
 	$(MAKE) .check
 
 # check downloaded packages against known-good versions
