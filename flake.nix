@@ -34,26 +34,34 @@
 					swift-argument-parser = fetchFromGitHub ({
 						owner = "apple";
 						repo = "swift-argument-parser";
-						rev = "1.3.0";
-						hash = "sha256-B4SwsR5v5dHaBZZMQsHmMh4oopkKWJgVl+k5yULaV3I=";
+						rev = "1.5.0";
+						hash = "sha256-TRaJG8ikzuQQjH3ERfuYNKPty3qI3ziC/9v96pvlvRs=";
 					} // lib.optionalAttrs stdenvNoCC.buildPlatform.isLinux {
 						# TODO: compilation of argument parser 1.3.0 fails
 						# https://github.com/NixOS/nixpkgs/pull/256956#issuecomment-1891063661
 						rev = "1.2.3";
 						hash = "sha256-qEJ329hqQyQVxtHScD7qPmWW9ZDf9bX+4xgpDlX0w5A=";
 					});
+					swift-asn1 = fetchFromGitHub {
+						owner = "apple";
+						repo = "swift-asn1";
+						rev = "1.3.0";
+						hash = "sha256-9WrDipPXevLnevsu3VEF2/W1l38vZIrXDCorpKZ6edo=";
+					};
 					swift-crypto = fetchFromGitHub {
 						owner = "apple";
 						repo = "swift-crypto";
-						rev = "3.1.0";
-						hash = "sha256-3LS1QrhTevZs51/qtfuXPZpm62d4gEn8pqMsYfED0yM=";
+						rev = "3.10.0";
+						hash = "sha256-PfaOjxs4uLnpCYeDRBF9/KnoIhU98P8WZpnOnfizkmI=";
 					};
 				in ''
 					ln -s ${swift-argument-parser} swift-argument-parser
-					ln -s ${swift-crypto} swift-crypto
-					substituteInPlace proxy/Package.swift --replace 'url: "https://github.com/apple/swift-argument-parser.git"' 'path: "../swift-argument-parser"), //'
-					substituteInPlace proxy/Package.swift --replace 'url: "https://github.com/apple/swift-crypto.git"' 'path: "../swift-crypto"), //'
-					substituteInPlace proxy/common/ssh.swift --replace /usr/bin/ssh ${openssh}/bin/ssh
+					ln -s ${swift-asn1} swift-asn1
+					cp -r ${swift-crypto} swift-crypto
+					substituteInPlace swift-crypto/Package.swift --replace-fail 'url: "https://github.com/apple/swift-asn1.git"' 'path: "../swift-asn1"), //'
+					substituteInPlace proxy/Package.swift --replace-fail 'url: "https://github.com/apple/swift-argument-parser.git"' 'path: "../swift-argument-parser"), //'
+					substituteInPlace proxy/Package.swift --replace-fail 'url: "https://github.com/apple/swift-crypto.git"' 'path: "../swift-crypto"), //'
+					substituteInPlace proxy/common/ssh.swift --replace-fail /usr/bin/ssh ${openssh}/bin/ssh
 				'';
 				dontUseSwiftpmBuild = true;
 				makeFlags = [ "-C proxy" "DESTDIR=$(out)" "LOCAL_ID=" "API_URL=" "API_KEY=" "USERNAME=" ];
