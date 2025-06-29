@@ -5,13 +5,13 @@
 	<key>CFBundleDevelopmentRegion</key>
 	<string>English</string>
 	<key>CFBundleDisplayName</key>
-	<string>SSHProxy</string>
+	<string>UnisonSync</string>
 	<key>CFBundleIdentifier</key>
-	<string>de.reactorcontrol.ssh-proxy</string>
+	<string>de.reactorcontrol.unison-sync</string>
 	<key>CFBundleInfoDictionaryVersion</key>
 	<string>6.0</string>
 	<key>CFBundleName</key>
-	<string>SSHProxy</string>
+	<string>UnisonSync</string>
 	<key>CFBundlePackageType</key>
 	<string>BNDL</string>
 </dict>
