@@ -70,7 +70,7 @@
 			with nixpkgs.legacyPackages.${system};
 			mkShellNoCC {
 				packages = [ php ] ++
-					lib.optionals stdenv.isLinux [ gnumake clang swift swiftpm openssh ];
+					lib.optionals stdenv.hostPlatform.isLinux [ gnumake clang swift swiftpm openssh ];
 				shellHook = ''
 					test -r ~/.local/config/shell/rc && . ~/.local/config/shell/rc
 				'';
