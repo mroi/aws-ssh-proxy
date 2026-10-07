@@ -60,7 +60,7 @@
 				dontUseSwiftpmBuild = true;
 				dontUseSwiftpmInstall = true;
 				makeFlags = [
-					"-C proxy" "DESTDIR=$(out)" "LOCAL_ID=" "API_URL=" "API_KEY="
+					"-C proxy" "DESTDIR=$(out)" "API_URL=" "API_KEY="
 				] ++ lib.optionals stdenv.hostPlatform.isLinux [
 					"ARCHS=${stdenv.hostPlatform.swift.arch}"
 				];
