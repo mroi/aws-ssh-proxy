@@ -5,9 +5,7 @@ require('aws.phar');
 // extract request details
 $command = explode('?', $_SERVER['REQUEST_URI'])[0];
 $command = trim($command, '/');
-$id = explode('&', $_SERVER['QUERY_STRING'])[0];
-$id = preg_replace('/[^A-Za-z0-9-]/', '', $id);
-$auth = explode('&', $_SERVER['QUERY_STRING'])[1] ?? '';
+$auth = $_SERVER['QUERY_STRING'];
 $auth = base64_decode($auth);
 $nonce = substr($auth, 0, 10);
 $hmac = substr($auth, 10);
@@ -15,18 +13,13 @@ $hmac = substr($auth, 10);
 // you can override these variables in config.php
 $region = isset($region) ? $region : getenv('AWS_DEFAULT_REGION');
 $apiKey = isset($apiKey) ? $apiKey : exit();
-$accept = isset($accept) ? $accept : array();
 
 header('Content-Type: text/plain');
 header('Cache-Control: no-store, no-cache, must-revalidate, max-age=0');
 
 // check request authentication
-if (!hash_equals($hmac, hash_hmac('sha256', $nonce . $command . '?' . $id, $apiKey, true))) {
+if (!hash_equals($hmac, hash_hmac('sha256', $nonce . $command, $apiKey, true))) {
 	header($_SERVER['SERVER_PROTOCOL'] . ' 401 Unauthorized');
-	exit();
-}
-if (!empty($accept) && !in_array($id, $accept)) {
-	header($_SERVER['SERVER_PROTOCOL'] . ' 403 Forbidden');
 	exit();
 }
 
@@ -40,8 +33,8 @@ try {
 	$result = $ec2->describeInstances([
 		'Filters' => [
 			[
-				'Name' => 'tag:unison-sync',
-				'Values' => [$id]
+				'Name' => 'tag-key',
+				'Values' => ['unison-sync']
 			]
 		]
 	]);
@@ -86,7 +79,7 @@ try {
 						'Tags' => [
 							[
 								'Key' => 'unison-sync',
-								'Value' => $id
+								'Value' => ''
 							]
 						]
 					]
