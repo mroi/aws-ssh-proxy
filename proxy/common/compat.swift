@@ -90,18 +90,28 @@ public class NSBackgroundActivityScheduler {
 	}
 	public func schedule(_ block: @escaping (@escaping CompletionHandler) -> Void) {
 		let queue = DispatchQueue(label: identifier, qos: qualityOfService)
-		var time = DispatchTime.now() + interval
-		func recurse(_ block: @escaping (@escaping () -> Void) -> Void) -> () -> Void {
-			return { block(recurse(block)) }
+
+		/// Sendability is unchecked, but warranted, because the boxed value is
+		/// only ever accessed from the scheduler's private, serial dispatch queue.
+		final class SendableBox<Value>: @unchecked Sendable {
+			var value: Value
+			init(_ value: Value) { self.value = value }
 		}
-		let work = DispatchWorkItem(block: recurse { next in
-			block { _ in }
-			if self.repeats && self.interval < .infinity {
-				time = time + self.interval
-				queue.asyncAfter(deadline: time, execute: next)
+
+		let block = SendableBox(block)
+
+		let interval = self.interval
+		let repeats = self.repeats
+		let time = SendableBox(DispatchTime.now() + interval)
+
+		@Sendable func run() {
+			block.value { _ in }
+			if repeats && interval < .infinity {
+				time.value = time.value + interval
+				queue.asyncAfter(deadline: time.value, execute: run)
 			}
-		})
-		queue.asyncAfter(deadline: time, execute: work)
+		}
+		queue.asyncAfter(deadline: time.value, execute: run)
 	}
 }
 #endif

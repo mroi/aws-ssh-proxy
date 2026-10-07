@@ -35,11 +35,6 @@
 						repo = "swift-argument-parser";
 						rev = "1.5.0";
 						hash = "sha256-TRaJG8ikzuQQjH3ERfuYNKPty3qI3ziC/9v96pvlvRs=";
-					} // lib.optionalAttrs stdenvNoCC.buildPlatform.isLinux {
-						# TODO: compilation of argument parser 1.3.0 fails
-						# https://github.com/NixOS/nixpkgs/pull/256956#issuecomment-1891063661
-						rev = "1.2.3";
-						hash = "sha256-qEJ329hqQyQVxtHScD7qPmWW9ZDf9bX+4xgpDlX0w5A=";
 					});
 					swift-asn1 = fetchFromGitHub {
 						owner = "apple";
@@ -63,7 +58,12 @@
 					substituteInPlace proxy/common/ssh.swift --replace-fail /usr/bin/ssh ${openssh}/bin/ssh
 				'';
 				dontUseSwiftpmBuild = true;
-				makeFlags = [ "-C proxy" "DESTDIR=$(out)" "LOCAL_ID=" "API_URL=" "API_KEY=" "USERNAME=" ];
+				dontUseSwiftpmInstall = true;
+				makeFlags = [
+					"-C proxy" "DESTDIR=$(out)" "LOCAL_ID=" "API_URL=" "API_KEY=" "USERNAME="
+				] ++ lib.optionals stdenv.hostPlatform.isLinux [
+					"ARCHS=${stdenv.hostPlatform.swift.arch}"
+				];
 			};
 
 		shell = system:
