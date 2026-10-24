@@ -35,7 +35,7 @@
 				"LaunchTemplateData": {
 					"DisableApiTermination": false,
 					"InstanceInitiatedShutdownBehavior": "terminate",
-					"InstanceType": "t4g.nano",
+					"InstanceType": "t4g.micro",
 					"KeyName": {
 						"Ref": "AWS::StackName"
 					},
