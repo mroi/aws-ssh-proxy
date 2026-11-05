@@ -33,20 +33,20 @@
 					swift-argument-parser = fetchFromGitHub ({
 						owner = "apple";
 						repo = "swift-argument-parser";
-						rev = "1.5.0";
-						hash = "sha256-TRaJG8ikzuQQjH3ERfuYNKPty3qI3ziC/9v96pvlvRs=";
+						rev = "1.8.2";
+						hash = "sha256-BWm2ZbNIvlamNp8cxoicFlAcujjhH22VPzs67lEIXWU=";
 					});
 					swift-asn1 = fetchFromGitHub {
 						owner = "apple";
 						repo = "swift-asn1";
-						rev = "1.3.0";
-						hash = "sha256-9WrDipPXevLnevsu3VEF2/W1l38vZIrXDCorpKZ6edo=";
+						rev = "1.7.4";
+						hash = "sha256-oCy/c6UXUgM/dLf054kvkOtVtUXMCdFDRJwWIfhdlGc=";
 					};
 					swift-crypto = fetchFromGitHub {
 						owner = "apple";
 						repo = "swift-crypto";
-						rev = "3.10.0";
-						hash = "sha256-PfaOjxs4uLnpCYeDRBF9/KnoIhU98P8WZpnOnfizkmI=";
+						rev = "5.1.1";
+						hash = "sha256-SQeC+RLgjjYmBY9cxk80to1lW7UxTM3/8Yz9ihkQFzY=";
 					};
 				in ''
 					ln -s ${swift-argument-parser} swift-argument-parser
